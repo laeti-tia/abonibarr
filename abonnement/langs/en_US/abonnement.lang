@@ -1,0 +1,153 @@
+# Manage Lead
+# Copyright (C) 2014  Florian HENRY <florian.henry@open-concept.pro>
+# Copyright (C) 2015 Raphaël Doursenaud <rdoursenaud@gpcsolutions.fr>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#
+# Générique
+#
+
+# Module label 'ModuleXXXName'
+# (where XXX is value of numeric property 'numero' of module)
+Module600001Name = Abonnement
+Abonnement = Abonnement
+# Module description 'ModuleXXXDesc'
+# (where XXX is value of numeric property 'numero' of module)
+Module600001Desc = Gestion d'abonnement
+
+#
+# Page d'administration
+#
+AbonnementSetup = Configuration du module Abonnement
+SettingsAbonnement = Réglages
+AbonnementSetupPage = Page de réglages du module Abonnement
+AbonnementNbDayDefaultClosure = Nombre de jours à ajouter à la date du jour pour obtenir la date de clôture par défaut
+AbonnementAdmVar=Administration
+AbonnementUserGroupAffect = Limiter les utilisateurs affectables à une affaire au groupe
+AbonnementAUT = Relance Automatique
+NBAbonnement = Nombre de relance
+
+#
+# Page À propos
+#
+About = À propos
+RelanceAbout = À propos du module relance
+RelanceAboutPage = Page à propos du module relance
+
+#
+# Permissions
+#
+Permission1031111=Voir les affaires
+Permission1031112=Modifier les affaires
+Permission1031113=Supprimer les affaires
+Permission1031114=Exporter les affaires
+
+#
+# Dictionnaires
+#
+LeadStatusDict = Module Affaires — Étapes
+LeadTypeDict = Module Affaires — Types
+
+
+#
+# Menu
+#
+MenuReAbonnement=Gestion Réabonnements
+AbonnementList= Renouveller
+AbonnementInfo = Historique 
+AbonnementCreate=Nouvel Abonnement
+AbonnementContact=Contact Abonnements
+AbonnementListCurrent=Abonnements en cours
+AbonnementListMyLead=Mes Abonnements
+AbonnementListLate=Abonnements en retard
+
+
+#
+# Status
+#
+LeadStatus = Étape de vente
+LeadStatus_PROSP=Prospection
+LeadStatus_CHIFF=Chiffrage
+LeadStatus_PROPO=Proposition
+LeadStatus_NEGO=Négociation
+LeadStatus_RECOND=Reconduction
+LeadStatus_WIN=Gagné
+LeadStatus_LOST=Perdu
+
+#
+# Type
+#
+LeadType = Type
+LeadType_SUPP = Assistance
+LeadType_TRAIN=Formation
+LeadType_ADVI=Conseil
+
+#
+# Card
+#
+LeadCommercial=Responsable
+LeadAmountGuess=Montant annoncé HT
+LeadDeadLine=Date de clôture
+LeadDelete=Supprimer l'affaire
+LeadRefInt=Référence interne
+LeadRealAmount=Montant réel HT
+LeadConfirmDelete = Êtes-vous sur de vouloir supprimer l'affaire ?
+LeadDescription=Description
+LeadDocuments = Documents associés
+LeadAddElement=Associer
+LeadLate=Affaire en retard
+ConfirmCloneLead=Etes vous sur de cloné le lead
+LeadShowLead=Affiché le lead
+SelectElement=Selectionner l'élément
+LeadLink=Lead associé(s)
+LeadLost=Affaire perdue
+LeadConfirmLost=Toute les proposition commerciale associer a cette affaire seront mises au status "Clos/Non signé" ?
+LeadPropalCloseByLead=Proposition cloturé par l'affaire %s perdue
+LeadObjectWindExists=Des propostions signée ou des factures existes (le statuts de l'affaire devrait êter gagné)
+LeadLastLeadUpdated=Les %s derniéres affaires modifiées
+
+#
+# Export
+#
+ExportDataset_lead=Lead
+LeadRefExt=Ref. Ext
+LeadStepCode=Etape de vente Code
+LeadStepLabel=Etape de vente Libellé
+LeadTypeCode=Type code
+LeadTypeLabel=Types Libellé
+lead@lead=Affaires
+
+#
+# List
+#
+LeadDateDebut = Date de Debut
+
+#
+# Graph
+#
+LeadNbLeadByType=Nb Affaires par type
+LeadNbLeadByStatus=Nb Affaires par étape de vente
+LeadStats=Statistiques des affaires
+LeadNbLead=Nb Affaires
+LeadNbLeadByMonth=Nb Affaires par mois
+LeadAmountOfLead=Montant des affaires
+LeadAmountOfLeadsByMonth=Montant des affaires par mois
+LeadTransRateOfLead=Taux de transformation
+LeadTransRateOfLeadsByMonth=Taux de transformation par mois
+
+#
+# Boxes
+#
+LastN=%s dernières

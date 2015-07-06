@@ -1,0 +1,90 @@
+# Manage Lead
+# Copyright (C) 2014  Florian HENRY <florian.henry@open-concept.pro>
+# Copyright (C) 2015 Raphaël Doursenaud <rdoursenaud@gpcsolutions.fr>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#
+# Générique
+#
+
+# Module label 'ModuleXXXName'
+# (where XXX is value of numeric property 'numero' of module)
+Module600002Name = Relances
+Relance = Relance
+# Module description 'ModuleXXXDesc'
+# (where XXX is value of numeric property 'numero' of module)
+Module103111Desc = Gestion d'affaires
+LeadSimpleNumRefModelDesc = Retourne le numéro sous la forme LEA-yymm-nnnn où yy est l'année, mm le mois et nnnn un compteur séquentiel sans rupture et sans remise à 0
+
+#
+# Page d'administration
+#
+RelanceSetup = Configuration du module relance
+SettingsRelance = Réglages
+RelanceSetupPage = Page de réglages du module relance
+RelanceNbDayDefaultClosure = Nombre de jours à ajouter à la date du jour pour obtenir la date de clôture par défaut
+RelanceAdmVar=Administration
+RelanceUserGroupAffect = Limiter les utilisateurs affectables à une affaire au groupe
+RELANCEAUT = Relance Automatique
+NBRERELANCE = Nombre de relance
+PARAMRELANCE = Paramètre relance
+
+#
+# Page À propos
+#
+About = À propos
+RelanceAbout = À propos du module relance
+RelanceAboutPage = Page à propos du module relance
+
+#
+# Permissions
+#
+
+#
+# Dictionnaires
+#
+TypeRelanceDictType = Type de Relance
+
+#
+# Menu
+#
+
+#
+# Status
+#
+
+#
+# Type
+#
+
+#
+# Card
+#
+
+#
+# Export
+#
+
+#
+# List
+#
+
+#
+# Graph
+#
+
+#
+# Boxes
+#
