@@ -1,8 +1,5 @@
 <?php
-/* Copyright (C) 2003      Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
- *
+/*
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -87,14 +84,13 @@ class modAbonnement extends DolibarrModules
 		//							'dir' => array('output' => 'othermodulename'),      // To force the default directories names
 		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@abonnement')) // Set here all workflow context managed by module
 		//                        );
-		$this->module_parts = array();
-
+		$this->module_parts = array('triggers' => 1);
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/abonnement/temp");
 		$this->dirs = array();
 
 		// Config pages. Put here list of php page, stored into abonnement/admin directory, to use to setup module.
-		$this->config_page_url = array("mysetuppage.php@abonnement");
+		$this->config_page_url = array("admin_abonnement.php@abonnement");
 
 		// Dependencies
 		$this->hidden = false;			// A condition to hide module
@@ -102,8 +98,8 @@ class modAbonnement extends DolibarrModules
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->conflictwith = array();	// List of modules id this module is in conflict with
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
-		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module
-		$this->langfiles = array("mylangfile@abonnement");
+		$this->need_dolibarr_version = array(3,7);	// Minimum version of Dolibarr required by module
+		$this->langfiles = array("abonnement@abonnement");
 
 		// Constants
 		// List of particular constants to add when module is enabled (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)
@@ -111,6 +107,16 @@ class modAbonnement extends DolibarrModules
 		//                             1=>array('MYMODULE_MYNEWCONST2','chaine','myvalue','This is another constant to add',0, 'current', 1)
 		// );
 		$this->const = array();
+		$this->const = array(
+				0 => array(
+						'NBRE_JOURS_AVANT_RENOUVELLEMENT',
+						'chaine',
+						'',
+						'Nombre de jour avant renouvellement du contrat  ',
+						0,
+						'allentities',
+						1
+				));
 		$this->tabs = array('contract:+tabname1:Abonnement:abonnement@abonnement:1:/abonnement/contact.php?id=__ID__');  					// To add a new tab identified by code tabname1
 				                        //    'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@abonnement:$user->rights->othermodule->read:/abonnement/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
 				                        //    'objecttype:-tabname:NU:conditiontoremove'
@@ -227,7 +233,7 @@ class modAbonnement extends DolibarrModules
 				'titre'=> 'MenuReAbonnement',
 				'mainmenu'=>'commercial',
 				'leftmenu'=> 'abonnement',
-				'url'=> '/contrat/list.php',
+				'url'=> '/abonnement/reabonnement.php',
 				'langs'=> 'abonnement@abonnement',
 				'position'=> 1001,
 				'enabled'=> '1',
@@ -243,7 +249,7 @@ class modAbonnement extends DolibarrModules
 				'titre'=> 'AbonnementList',
 				'mainmenu'=> 'commercial',
 				'leftmenu'=> '', // On n'indique rien ici car on ne souhaite pas intégrer de sous-menus à ce menu
-				'url'=> '/contrat/list.php',
+				'url'=> '/abonnement/reabonnement.php',
 				'langs'=> 'abonnement@abonnement',
 				'position'=> 1011,
 				'enabled'=> '1',
@@ -252,20 +258,20 @@ class modAbonnement extends DolibarrModules
 				'user'=> 0
 		);
 		
-		$this->menu[$r++]=array(
-				'fk_menu'=>'fk_mainmenu=commercial,fk_leftmenu=abonnement', //On utilise les ancres définis dans le menu parent déclaré au dessus
-				'type'=> 'left', // Toujours un menu gauche
-				'titre'=> 'AbonnementInfo',
-				'mainmenu'=> 'commercial',
-				'leftmenu'=> '', // On n'indique rien ici car on ne souhaite pas intégrer de sous-menus à ce menu
-				'url'=> '/contrat/list.php',
-				'langs'=> 'abonnement@abonnement',
-				'position'=> 1021,
-				'enabled'=> '1',
-				'perms'=> '',
-				'target'=> '',
-				'user'=> 0
-		);
+// 		$this->menu[$r++]=array(
+// 				'fk_menu'=>'fk_mainmenu=commercial,fk_leftmenu=abonnement', //On utilise les ancres définis dans le menu parent déclaré au dessus
+// 				'type'=> 'left', // Toujours un menu gauche
+// 				'titre'=> 'AbonnementInfo',
+// 				'mainmenu'=> 'commercial',
+// 				'leftmenu'=> '', // On n'indique rien ici car on ne souhaite pas intégrer de sous-menus à ce menu
+// 				'url'=> '/contrat/list.php',
+// 				'langs'=> 'abonnement@abonnement',
+// 				'position'=> 1021,
+// 				'enabled'=> '1',
+// 				'perms'=> '',
+// 				'target'=> '',
+// 				'user'=> 0
+// 		);
 		
 
 		// Exports

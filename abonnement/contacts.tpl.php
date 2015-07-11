@@ -1,7 +1,5 @@
 <?php
 /* 
- * Copyright (C) 2014 Florian HENRY <florian.henry@open-concept.pro>
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -25,7 +23,7 @@ if (! class_exists('FormCompany')) {
 $module = $object->element;
 
 $permission = $user->rights->$module->write;
-$permission = 1;
+//$permission = 1;
 $formcompany = new FormCompany($db);
 $companystatic = new Societe($db);
 $contactstatic = new Contact($db);

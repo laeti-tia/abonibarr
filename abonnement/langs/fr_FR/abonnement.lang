@@ -1,7 +1,3 @@
-# Manage Lead
-# Copyright (C) 2014  Florian HENRY <florian.henry@open-concept.pro>
-# Copyright (C) 2015 Raphaël Doursenaud <rdoursenaud@gpcsolutions.fr>
-#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -38,6 +34,7 @@ AbonnementAdmVar=Administration
 AbonnementUserGroupAffect = Limiter les utilisateurs affectables à une affaire au groupe
 AbonnementAUT = Relance Automatique
 NBAbonnement = Nombre de relance
+NBRE_JOURS_AVANT_RENOUVELLEMENT = Nombre de jours avant le renouvellement de l'abonnement
 
 #
 # Page À propos
@@ -50,15 +47,10 @@ RelanceAboutPage = Page à propos du module relance
 # Permissions
 #
 Permission1031111=Voir les affaires
-Permission1031112=Modifier les affaires
-Permission1031113=Supprimer les affaires
-Permission1031114=Exporter les affaires
 
 #
 # Dictionnaires
 #
-LeadStatusDict = Module Affaires — Étapes
-LeadTypeDict = Module Affaires — Types
 
 
 #
@@ -72,82 +64,42 @@ AbonnementContact=Contact Abonnements
 AbonnementListCurrent=Abonnements en cours
 AbonnementListMyLead=Mes Abonnements
 AbonnementListLate=Abonnements en retard
+ABON_NBRE_JOURS = Nbre Joursss
 
 
 #
 # Status
 #
-LeadStatus = Étape de vente
-LeadStatus_PROSP=Prospection
-LeadStatus_CHIFF=Chiffrage
-LeadStatus_PROPO=Proposition
-LeadStatus_NEGO=Négociation
-LeadStatus_RECOND=Reconduction
-LeadStatus_WIN=Gagné
-LeadStatus_LOST=Perdu
+
 
 #
 # Type
 #
-LeadType = Type
-LeadType_SUPP = Assistance
-LeadType_TRAIN=Formation
-LeadType_ADVI=Conseil
 
 #
-# Card
+# Réabonnement
 #
-LeadCommercial=Responsable
-LeadAmountGuess=Montant annoncé HT
-LeadDeadLine=Date de clôture
-LeadDelete=Supprimer l'affaire
-LeadRefInt=Référence interne
-LeadRealAmount=Montant réel HT
-LeadConfirmDelete = Êtes-vous sur de vouloir supprimer l'affaire ?
-LeadDescription=Description
-LeadDocuments = Documents associés
-LeadAddElement=Associer
-LeadLate=Affaire en retard
-ConfirmCloneLead=Etes vous sur de cloné le lead
-LeadShowLead=Affiché le lead
-SelectElement=Selectionner l'élément
-LeadLink=Lead associé(s)
-LeadLost=Affaire perdue
-LeadConfirmLost=Toute les proposition commerciale associer a cette affaire seront mises au status "Clos/Non signé" ?
-LeadPropalCloseByLead=Proposition cloturé par l'affaire %s perdue
-LeadObjectWindExists=Des propostions signée ou des factures existes (le statuts de l'affaire devrait êter gagné)
-LeadLastLeadUpdated=Les %s derniéres affaires modifiées
+AbonContratChecked=Aucun contrat n'a été sélectionné
+EnvoiReconduction = Envoyer les réabonnements
+AllRecipientSelectedForReabonnement=Tous les tiers sélectionnés et qui ont un email défini (notez qu'un email par contrat sera envoyé)
 
-#
+AbonAjoutSucces = L'abonné a été ajouté
+AbonAttacheFactureEMail=Un document utilisant le modèle par défaut de facture sera généré et attaché à l'email.
+AbonAuncuneFatureEnvoiyer = Aucun email de réabonnement  envoyé
+AbonEnvoiReabonnement = %s réabonnement(s) envoyé(s).
+MailTopicSendInvoices = Résultat de l'envoi des réabonnements en masse par email
+sendReabonnement = Envoyer les factures de réabonnement
 # Export
 #
-ExportDataset_lead=Lead
-LeadRefExt=Ref. Ext
-LeadStepCode=Etape de vente Code
-LeadStepLabel=Etape de vente Libellé
-LeadTypeCode=Type code
-LeadTypeLabel=Types Libellé
-lead@lead=Affaires
 
 #
 # List
-#
-LeadDateDebut = Date de Debut
+REABONNEMENTLIST = Liste des réabonnements
 
 #
 # Graph
 #
-LeadNbLeadByType=Nb Affaires par type
-LeadNbLeadByStatus=Nb Affaires par étape de vente
-LeadStats=Statistiques des affaires
-LeadNbLead=Nb Affaires
-LeadNbLeadByMonth=Nb Affaires par mois
-LeadAmountOfLead=Montant des affaires
-LeadAmountOfLeadsByMonth=Montant des affaires par mois
-LeadTransRateOfLead=Taux de transformation
-LeadTransRateOfLeadsByMonth=Taux de transformation par mois
 
 #
 # Boxes
 #
-LastN=%s dernières

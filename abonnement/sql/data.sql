@@ -14,8 +14,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (6000021,'Societe','external','ABONPAPIER','Contact client abonnement papier','1',null);
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (6000022,'Societe','external','ABONWEB','Contact client abonnement web','1',null);
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (6000021,'contrat','external','ABONPAPIER','Contact client abonnement papier','1',null);
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (6000022,'contrat','external','ABONWEB','Contact client abonnement web','1',null);
 
 
 

@@ -1,6 +1,5 @@
 <?php
 /* 
- * Copyright (C) 2014 Florian HENRY <florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +17,7 @@
 
 /**
  * \file		
- * \ingroup	lead
+ * \ingroup	autre
  * \brief		This file is an example module setup page
  * Put some comments here
  */
@@ -30,11 +29,11 @@ if (! $res) {
 
 // Libraries
 require_once DOL_DOCUMENT_ROOT . '/core/lib/admin.lib.php';
-//require_once '../lib/relance.lib.php';
+require_once '../lib/abonnement.lib.php';
 //require_once '../class/lead.class.php';
 
 // Translations
-$langs->load("relance@relance");
+$langs->load("abonnement@abonnement");
 
 // Access control
 if (! $user->admin) {
@@ -52,21 +51,15 @@ $scandir = GETPOST('scandir', 'alpha');
  */
 
  if ($action == 'setvar') {
-	
-	$nb_relance = GETPOST('NBRE_RELANCE', 'int');
-	if (! empty($nb_relance)) {
-		$res = dolibarr_set_const($db, 'NBRE_RELANCE', $nb_relance, 'chaine', 0, '', $conf->entity);
+ 	$error = 0 ;
+	$nb_renouvel = GETPOST('NBRE_JOURS_AVANT_RENOUVELLEMENT', 'int');
+	if (! empty($nb_renouvel)) {
+		$res = dolibarr_set_const($db, 'NBRE_JOURS_AVANT_RENOUVELLEMENT', $nb_renouvel, 'chaine', 0, '', $conf->entity);
 	}
 	if (! $res > 0)
 		$error ++;
 	
-	$rel_aut = GETPOST('RELANCE_AUT', 'int');
-	if ($rel_aut==-1) $rel_aut='';
-
-	$res = dolibarr_set_const($db, 'RELANCE_AUT', $rel_aut, 'chaine', 0, '', $conf->entity);
-
-	if (! $res > 0)
-		$error ++;
+	
 	
 	if (! $error) {
 		setEventMessages($langs->trans("SetupSaved"), null, 'mesgs');
@@ -78,7 +71,7 @@ $scandir = GETPOST('scandir', 'alpha');
 /*
  * View
  */
-$page_name = "RelanceSetup";
+$page_name = "AbonnementSetup";
 llxHeader('', $langs->trans($page_name));
 
 // Subheader
@@ -86,8 +79,8 @@ $linkback = '<a href="' . DOL_URL_ROOT . '/admin/modules.php">' . $langs->trans(
 print_fiche_titre($langs->trans($page_name), $linkback);
 
 // Configuration header
-$head = relanceAdminPrepareHead();
-dol_fiche_head($head, 'settings', $langs->trans("Module600002Name"), 0, "relance@relance");
+$head = abonnementAdminPrepareHead();
+dol_fiche_head($head, 'settings', $langs->trans("Module600001Name"), 0, "abonnement@abonnement");
 
 
 clearstatcache();
@@ -95,7 +88,7 @@ clearstatcache();
 $form = new Form($db);
 
 // Admin var of module
-print_fiche_titre($langs->trans("RelanceAdmVar"));
+print_fiche_titre($langs->trans("AbonnementAdmVar"));
 
 print '<form method="post" action="' . $_SERVER['PHP_SELF'] . '" >';
 print '<input type="hidden" name="token" value="' . $_SESSION['newtoken'] . '">';
@@ -109,14 +102,9 @@ print '<td width="400px">' . $langs->trans("Valeur") . '</td>';
 print "</tr>\n";
 
 // Nb Days
-print '<tr class="pair"><td>' . $langs->trans("RELANCEAUT") . '</td>';
+print '<tr class="pair"><td>' . $langs->trans("NBRE_JOURS_AVANT_RENOUVELLEMENT") . '</td>';
 print '<td align="left">';
-print '<input type="text" name="RELANCE_AUT" value="' . $conf->global->RELANCE_AUT . '" size="4" ></td>';
-print '</tr>';
-
-print '<tr class="pair"><td>' . $langs->trans("NBRERELANCE") . '</td>';
-print '<td align="left">';
-print '<input type="text" name="NBRE_RELANCE" value="' . $conf->global->NBRE_RELANCE . '" size="4" ></td>';
+print '<input type="text" name="NBRE_JOURS_AVANT_RENOUVELLEMENT" value="' . $conf->global->NBRE_JOURS_AVANT_RENOUVELLEMENT . '" size="4" ></td>';
 print '</tr>';
 
 // User Group

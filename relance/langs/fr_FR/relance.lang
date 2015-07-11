@@ -1,7 +1,3 @@
-# Manage Lead
-# Copyright (C) 2014  Florian HENRY <florian.henry@open-concept.pro>
-# Copyright (C) 2015 Raphaël Doursenaud <rdoursenaud@gpcsolutions.fr>
-#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -40,6 +36,8 @@ RelanceUserGroupAffect = Limiter les utilisateurs affectables à une affaire au 
 RELANCEAUT = Relance Automatique
 NBRERELANCE = Nombre de relance
 PARAMRELANCE = Paramètre relance
+OBJECTMESSAGE = Object 
+MESSAGEEMAIL = Message
 
 #
 # Page À propos
