@@ -26,8 +26,7 @@
 
 // Put here all includes required by your class file
 require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
-//require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
-//require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
+require_once DOL_DOCUMENT_ROOT.'/relance/class/relancetype.class.php';
 
 
 /**
@@ -46,6 +45,7 @@ class Relance extends CommonObject
 	var $fk_type_relance;
 	var $envoi_email;
 	var $textemail;
+	var $sujet_email;
 
     
 
@@ -79,8 +79,8 @@ class Relance extends CommonObject
 		if (isset($this->fk_type_relance)) $this->fk_type_relance=trim($this->fk_type_relance);
 		if (isset($this->envoi_email)) $this->envoi_email=trim($this->envoi_email);
 		if (isset($this->textemail)) $this->textemail=trim($this->textemail);
-
-        
+		if (isset($this->sujet_email)) $this->sujet_email=trim($this->sujet_email);
+		
 
 		// Check parameters
 		// Put here code to add control on parameters values
@@ -90,15 +90,16 @@ class Relance extends CommonObject
 		
 		$sql.= "fk_type_relance,";
 		$sql.= "envoi_email,";
-		$sql.= "textemail";
-
+		$sql.= "textemail,";
+        $sql.="sujet_email";
 		
         $sql.= ") VALUES (";
         
 		$sql.= " ".(! isset($this->fk_type_relance)?'NULL':"'".$this->fk_type_relance."'").",";
 		$sql.= " ".(! isset($this->envoi_email)?'NULL':"'".$this->envoi_email."'").",";
 		$sql.= " ".(! isset($this->textemail)?'NULL':"'".$this->db->escape($this->textemail)."'")."";
-
+		$sql.= " ".(! isset($this->sujet_email)?'NULL':"'".$this->db->escape($this->sujet_email)."'")."";
+		
         
 		$sql.= ")";
 
@@ -154,12 +155,12 @@ class Relance extends CommonObject
     {
     	global $langs;
         $sql = "SELECT";
-		//$sql.= " t.fk_type_relance,";
+		$sql.= " t.fk_type_relance,";
 		
 		$sql.= " t.fk_type_relance,";
 		$sql.= " t.envoi_email,";
-		$sql.= " t.textemail";
-
+		$sql.= " t.textemail,";
+		$sql.= " t.sujet_email";
 		
         $sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
         if ($ref) $sql.= " WHERE t.ref = '".$ref."'";
@@ -178,7 +179,7 @@ class Relance extends CommonObject
 				$this->fk_type_relance = $obj->fk_type_relance;
 				$this->envoi_email = $obj->envoi_email;
 				$this->textemail = $obj->textemail;
-
+                $this->sujet_email = $obj->sujet_email;
                 
             }
             $this->db->free($resql);
@@ -210,7 +211,8 @@ class Relance extends CommonObject
 		if (isset($this->fk_type_relance)) $this->fk_type_relance=trim($this->fk_type_relance);
 		if (isset($this->envoi_email)) $this->envoi_email=trim($this->envoi_email);
 		if (isset($this->textemail)) $this->textemail=trim($this->textemail);
-
+		if (isset($this->sujet_email)) $this->sujet_email=trim($this->sujet_email);
+		
         
 
 		// Check parameters
@@ -221,8 +223,9 @@ class Relance extends CommonObject
         
 		$sql.= " fk_type_relance=".(isset($this->fk_type_relance)?$this->fk_type_relance:"null").",";
 		$sql.= " envoi_email=".(isset($this->envoi_email)?$this->envoi_email:"null").",";
-		$sql.= " textemail=".(isset($this->textemail)?"'".$this->db->escape($this->textemail)."'":"null")."";
-
+		$sql.= " textemail=".(isset($this->textemail)?"'".$this->db->escape($this->textemail)."'":"null").",";
+		$sql.= " sujet_email=".(isset($this->sujet_email)?"'".$this->db->escape($this->sujet_email)."'":"null")."";
+		
         
         $sql.= " WHERE fk_type_relance=".$this->id;
 
@@ -390,8 +393,18 @@ class Relance extends CommonObject
 		$this->fk_type_relance='';
 		$this->envoi_email='';
 		$this->textemail='';
+		$this->sujet_email='';
 
 		
 	}
-
+    
+	/*
+	 * 
+	 */
+	function getLabelTypeRelance($idrelance) {
+		$typeRelance = new Crelancetype($this->db);
+		$typeRelance->fetch($this->fk_type_relance);
+		var_dump($typeRelance->nbre_jours);exit;
+		return $typeRelance->label;
+	}
 }

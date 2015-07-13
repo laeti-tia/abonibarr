@@ -432,4 +432,28 @@ function getList()
 		}
 	}
 	
+ function getMenuRelance($index ) {
+		
+		$relancetypeArr = $this->getList();
+		foreach ($relancetypeArr as $typeRelance)
+		{
+			$this->menu[$index++]=array(
+					'fk_menu'=>'fk_mainmenu=accountancy,fk_leftmenu=relance', //On utilise les ancres définis dans le menu parent déclaré au dessus
+					'type'=> 'left', // Toujours un menu gauche
+					'titre'=> $typeRelance->label,
+					'mainmenu'=> 'accountancy',
+					'leftmenu'=> '', // On n'indique rien ici car on ne souhaite pas intégrer de sous-menus à ce menu
+					'url'=> '/relance/rappel.php?late='.$typeRelance->nbre_jours,
+					'langs'=> 'relance@relance',
+					'position'=> 2021,
+					'enabled'=> '1',
+					'perms'=> '',
+					'target'=> '',
+					'user'=> 0
+			);
+		}
+		
+		
+	}
+	
 }

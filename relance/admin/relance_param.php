@@ -58,13 +58,16 @@ if($action == 'add') {
 	foreach ($relancetypeArr as $objRelanceType ) {
 		
 		$opt_textemail ='textemail'.$objRelanceType->id;
+		$opt_sujet_email ='sujet_email'.$objRelanceType->id;
 	   $textemail = GETPOST($opt_textemail, 'alpha');
+	   $sujet_email = GETPOST($opt_sujet_email, 'alpha');
 	   $obj= new Relance($db);
 	   $resp=$obj->fetch($objRelanceType->id);
 	  
 	   $obj->textemail=$textemail;
 	   
 	   $obj->envoi_email = 1;
+	   $obj->sujet_email = $sujet_email; 
 	   
 	   if (! $error)
 	   {
@@ -119,16 +122,21 @@ print '<br>';
 print "<table summary=\"listofattributes\" class=\"noborder\" width=\"100%\">";
 foreach ($relancetypeArr as $objRelanceType ) {
 	print_fiche_titre($objRelanceType->label);
+	print '<br>';
+	print '<br>';
 	$obj= new Relance($db);
 	$resp=$obj->fetch($objRelanceType->id);
 
 	print '<form name="new_mailing" action="'.$_SERVER['PHP_SELF'].'" method="POST">'."\n";
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print '<input type="hidden" name="action" value="add">';
-
-	
+    
 	print '<table class="border" width="100%">';
-	print '<tr><td width="25%" class="fieldrequired">'.$langs->trans("OBJECTMESSAGE").'</td><td><input class="flat" name="objet_msg"'.$objRelanceType->id.' size="68" value="'.$objRelanceType->id.'"></td></tr>';
+	print '<tr><td width="25%" class="fieldrequired">'.$langs->trans("EnvoiEmail").'</td><td><input class="flat" name="envoi_email'.$objRelanceType->id.'" size="68" value="'.$obj->envoi_email.'"></td></tr>';
+	print '</table>';
+		
+	print '<table class="border" width="100%">';
+	print '<tr><td width="25%" class="fieldrequired">'.$langs->trans("OBJECTMESSAGE").'</td><td><input class="flat" name="sujet_email'.$objRelanceType->id.'" size="68" value="'.$obj->sujet_email.'"></td></tr>';
 	print '</table>';
 
 	print '<table class="border" width="100%">';
@@ -146,7 +154,7 @@ foreach ($relancetypeArr as $objRelanceType ) {
 	$doleditor->Create();
 	print '</td></tr>';
 	print '</table>';
-
+	print '<br>';
 	
 	
 }

@@ -38,7 +38,8 @@ NBRERELANCE = Nombre de relance
 PARAMRELANCE = Paramètre relance
 OBJECTMESSAGE = Object 
 MESSAGEEMAIL = Message
-
+CommonSubstitutions = Substitutions communes
+EnvoiEmail = Envoyer un Email ?
 #
 # Page À propos
 #

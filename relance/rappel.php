@@ -36,15 +36,20 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/relance/class/pdfmasse.class.php';
+require_once DOL_DOCUMENT_ROOT.'/relance/class/relance.class.php';
 
 $langs->load("mails");
 $langs->load("bills");
+$langs->load("relance");
 
 $id = (GETPOST('facid','int') ? GETPOST('facid','int') : GETPOST('id','int'));
 $action = GETPOST('action','alpha');
 $option = GETPOST('option');
 $mode=GETPOST('mode');
 $builddoc_generatebutton=GETPOST('builddoc_generatebutton');
+$idrelance = GETPOST('idrelance','int');
+$late1 = GETPOST('late1','int');
+$late2 = GETPOST('late2','int');
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
@@ -216,6 +221,8 @@ if ($action == 'remove_file')
 
 $form = new Form($db);
 $formfile = new FormFile($db);
+$relance = new Relance($db);
+$relance->fetch($idrelance);
 
 $title=$langs->trans("BillsCustomersUnpaid");
 if ($option=='late') $title=$langs->trans("BillsCustomersUnpaid");
@@ -290,7 +297,9 @@ $sql.= " WHERE f.fk_soc = s.rowid";
 $sql.= " AND f.entity = ".$conf->entity;
 $sql.= " AND f.type IN (0,1,3) AND f.fk_statut = 1";
 $sql.= " AND f.paye = 0";
-if ($option == 'late') $sql.=" AND f.date_lim_reglement < '".$db->idate(dol_now() - $conf->facture->client->warning_delay)."'";
+if ( $late1) $sql.=" AND DATEDIFF( f.date_lim_reglement,now()) >= '".$late1."'";
+if ( $late2) $sql.=" AND DATEDIFF( f.date_lim_reglement,now()) <= '".$late2."'";
+
 if (! $user->rights->societe->client->voir && ! $socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 if (! empty($socid)) $sql .= " AND s.rowid = ".$socid;
 if (GETPOST('filtre'))
@@ -347,7 +356,8 @@ if ($resql)
 	$titre=(! empty($socid)?$langs->trans("BillsCustomersUnpaidForCompany",$soc->name):$langs->trans("BillsCustomersUnpaid"));
 	if ($option == 'late') $titre.=' ('.$langs->trans("Late").')';
 	else $titre.=' ('.$langs->trans("All").')';
-
+	
+    //$titre .=$relance->getLabelTypeRelance($idrelance);
 	$link='';
 	//if (empty($option)) $link='<a href="'.$_SERVER["PHP_SELF"].'?option=late">'.$langs->trans("ShowUnpaidLateOnly").'</a>';
 	//elseif ($option == 'late') $link='<a href="'.$_SERVER["PHP_SELF"].'">'.$langs->trans("ShowUnpaidAll").'</a>';
@@ -367,7 +377,9 @@ if ($resql)
 
 		$topicmail="MailTopicSendRemindUnpaidInvoices";
 		$modelmail="facture_relance";
-
+        
+        $topicmail = $relance->sujet_email;
+        $msgTemplate = $relance->textemail; 
 		// Cree l'objet formulaire mail
 		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
 		$formmail = new FormMail($db);
@@ -385,7 +397,7 @@ if ($resql)
 		$formmail->withtoccc=$conf->global->MAIN_EMAIL_USECCC;
 		$formmail->withtopic=$langs->transnoentities($topicmail, '__FACREF__', '__REFCLIENT__');
 		$formmail->withfile=$langs->trans("EachInvoiceWillBeAttachedToEmail");
-		$formmail->withbody=1;
+		$formmail->withbody=$msgTemplate;
 		$formmail->withdeliveryreceipt=1;
 		$formmail->withcancel=1;
 		// Tableau des substitutions
@@ -397,7 +409,7 @@ if ($resql)
 
 		// Tableau des parametres complementaires du post
 		$formmail->param['action']=$action;
-		$formmail->param['models']=$modelmail;
+		//$formmail->param['models']=$modelmail;
 		$formmail->param['facid']=$object->id;
 		$formmail->param['returnurl']=$_SERVER["PHP_SELF"].'?id='.$object->id;
 
@@ -408,7 +420,11 @@ if ($resql)
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print '<input type="hidden" name="mode" value="'.$mode.'">';
 	if ($late) print '<input type="hidden" name="late" value="'.dol_escape_htmltag($late).'">';
-
+	print '<input type="hidden" name="late1" value="'.dol_escape_htmltag($late1).'">';
+	print '<input type="hidden" name="late2" value="'.dol_escape_htmltag($late2).'">';
+	print '<input type="hidden" name="idrelance" value="'.dol_escape_htmltag($idrelance).'">';
+	
+	
 	if ($resultmasssend)
 	{
 		print '<br><strong>'.$langs->trans("ResultOfMassSending").':</strong><br>'."\n";
@@ -621,7 +637,7 @@ if ($resql)
 	if ($action != 'presend')
 	{
 		print '<div class="tabsAction">';
-		print '<a href="'.$_SERVER["PHP_SELF"].'?mode=sendremind&action=presend" class="butAction" name="buttonsendremind" value="'.dol_escape_htmltag($langs->trans("SendRemind")).'">'.$langs->trans("SendRemind").'</a>';
+		print '<a href="'.$_SERVER["PHP_SELF"].'?mode=sendremind&action=presend&idrelance='.$idrelance.'&late1='.$late1.'&late2='.$late2.'" class="butAction" name="buttonsendremind" value="'.dol_escape_htmltag($langs->trans("SendRemind")).'">'.$langs->trans("SendRemind").'</a>';
 		print '</div>';
 		print '<br>';
 	}

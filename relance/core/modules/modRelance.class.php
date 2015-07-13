@@ -23,6 +23,7 @@
 *  \brief      Description and activation file for module Relance
 */
 include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
+require_once DOL_DOCUMENT_ROOT . '/relance/class/crelancetype.class.php';
 
 
 /**
@@ -260,7 +261,6 @@ class modRelance extends DolibarrModules
 		);
 		$r++;
 		
-		
 		$this->menu[$r++]=array(
 				'fk_menu'=>'fk_mainmenu=accountancy,fk_leftmenu=customers_bills', //On utilise les ancres définis dans le menu parent déclaré au dessus
 				'type'=> 'left', // Toujours un menu gauche
@@ -275,14 +275,19 @@ class modRelance extends DolibarrModules
 				'target'=> '',
 				'user'=> 0
 		);
-		
-		$this->menu[$r++]=array(
+		$relancetype = new Crelancetype($this->db);
+		$relancetypeArr = $relancetype->getList();
+		$oldLate = 0;
+		foreach ($relancetypeArr as $typeRelance)
+		{   
+			$option = 'idrelance='.$typeRelance->id.'&late1='.$oldLate.'&late2='.$typeRelance->nbre_jours;
+			$this->menu[$r++]=array(
 				'fk_menu'=>'fk_mainmenu=accountancy,fk_leftmenu=relance', //On utilise les ancres définis dans le menu parent déclaré au dessus
 				'type'=> 'left', // Toujours un menu gauche
-				'titre'=> 'AbonnementInfo',
+				'titre'=> $typeRelance->label,
 				'mainmenu'=> 'accountancy',
 				'leftmenu'=> '', // On n'indique rien ici car on ne souhaite pas intégrer de sous-menus à ce menu
-				'url'=> '/compta/facture/impayees.php',
+				'url'=> '/relance/rappel.php?'.$option,
 				'langs'=> 'relance@relance',
 				'position'=> 2021,
 				'enabled'=> '1',
@@ -290,7 +295,8 @@ class modRelance extends DolibarrModules
 				'target'=> '',
 				'user'=> 0
 		);
-		
+			$oldLate = $typeRelance->nbre_jours;
+		}
 
 
 		// Exports
