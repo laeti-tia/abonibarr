@@ -42,6 +42,7 @@ if ($user->societe_id) $socid=$user->societe_id;
 $result=restrictedArea($user,'contrat',$id);
 
 $object = new Contrat($db);
+$formAbonnement = new FormAbonnement($db);
 
 
 /*
@@ -77,6 +78,7 @@ if ($action == 'addabonne' && $user->rights->contrat->creer)
 		$objContact->priv			= GETPOST("priv",'int');
 		$objContact->note_public	= GETPOST("note_public");
 		$objContact->note_private	= GETPOST("note_private");
+		$password = GETPOST("password");
 		$objContact->statut			= 1; //Defult status to Actif
 		$error=0;
 		$errors=array();
@@ -88,7 +90,7 @@ if ($action == 'addabonne' && $user->rights->contrat->creer)
 			$error++; $errors=array_merge($errors,($objContact->error?array($objContact->error):$objContact->errors));
 			$action = 'create';
 		}
-		//var_dump($_POST);exit;
+		
 		$result = $object->add_contact($contactid, $_POST["type_contact"], 'external');
 		if ($result < 0)
 		{
@@ -105,7 +107,7 @@ if ($action == 'addabonne' && $user->rights->contrat->creer)
 // 			setEventMessage($mesg, 'errors');
 		}
 		 $nuser = new User($db);
-		$resultUser=$nuser->create_from_contact($objContact,$objContact->email);
+		$resultUser=$nuser->create_from_contact($objContact,$objContact->email,$password);
 
 		if ($resultUser < 0)
 		{
@@ -114,6 +116,8 @@ if ($action == 'addabonne' && $user->rights->contrat->creer)
 			//$action = 'create';
 			setEventMessage($langs->trans($nuser->error), 'errors');
 		} 
+		//$nuser->send_password($user, $password);
+		$formAbonnement->envoiEmailUser($nuser,$password);
 	}
 
 	if (!$error )
@@ -153,7 +157,6 @@ $formcompany= new FormCompany($db);
 $contactstatic=new Contact($db);
 $userstatic=new User($db);
 $companystatic = new Societe($db);
-$formAbonnement = new FormAbonnement();
 
 /* *************************************************************************** */
 /*                                                                             */
@@ -245,7 +248,7 @@ if ($id > 0 )
 
 			print '<tr><td width="15%"><label for="type_contact">'.$langs->trans("ThirdPartyContact").'</label></td>';
 			print '<td>';
-			print  $formAbonnement->selectTypeContact();
+			print  $formAbonnement->makeAbonWeb();
 			print '</td></tr>';
 
 			// Address
