@@ -64,8 +64,8 @@ AbonnementContact=Contact Abonnements
 AbonnementListCurrent=Abonnements en cours
 AbonnementListMyLead=Mes Abonnements
 AbonnementListLate=Abonnements en retard
-ABON_NBRE_JOURS = Nbre Joursss
-
+ABON_NBRE_JOURS = Nbre Jours
+AddAbonne = Ajouter un abonné
 
 #
 # Status

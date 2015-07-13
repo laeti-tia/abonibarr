@@ -1,6 +1,4 @@
--- Manage Lead
--- Copyright (C) 2014  Florian HENRY <florian.henry@open-concept.pro>
---
+
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
 -- the Free Software Foundation, either version 3 of the License, or
@@ -14,8 +12,8 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (6000021,'contrat','external','ABONPAPIER','Contact client abonnement papier','1',null);
-INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (6000022,'contrat','external','ABONWEB','Contact client abonnement web','1',null);
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (6000021,'contrat','external','ABONPAPIER','Abonné papier','1',null);
+INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (6000022,'contrat','external','ABONWEB','Abonné web','1',null);
 
 
 

@@ -26,7 +26,7 @@
 
 // Put here all includes required by your class file
 require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
-require_once DOL_DOCUMENT_ROOT.'/relance/class/relancetype.class.php';
+require_once DOL_DOCUMENT_ROOT.'/relance/class/crelancetype.class.php';
 
 
 /**

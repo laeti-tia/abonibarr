@@ -296,7 +296,7 @@ if ($id > 0 )
 
 		$buttoncreate='';
 
-		$addcontact = (! empty($conf->global->SOCIETE_ADDRESSES_MANAGEMENT) ? $langs->trans("AddContact") : $langs->trans("AddContactAddress"));
+		$addcontact =  $langs->trans("AddAbonne");
 		$buttoncreate='<a class="addnewrecord" href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=create">'.$addcontact;
 		if (empty($conf->dol_optimize_smallscreen)) $buttoncreate.=' '.img_picto($addcontact,'filenew');
 		$buttoncreate.='</a>'."\n";
