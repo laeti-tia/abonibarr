@@ -257,7 +257,23 @@ class modAbonnement extends DolibarrModules
 				'target'=> '',
 				'user'=> 0
 		);
+		$r++;
 		
+		
+		$this->menu[$r++]=array(
+				'fk_menu'=>'fk_mainmenu=commercial,fk_leftmenu=abonnement', //On utilise les ancres définis dans le menu parent déclaré au dessus
+				'type'=> 'left', // Toujours un menu gauche
+				'titre'=> 'AbonnementCreate',
+				'mainmenu'=> 'commercial',
+				'leftmenu'=> '', // On n'indique rien ici car on ne souhaite pas intégrer de sous-menus à ce menu
+				'url'=> '/abonnement/abonnement.php',
+				'langs'=> 'abonnement@abonnement',
+				'position'=> 1012,
+				'enabled'=> '1',
+				'perms'=> '',
+				'target'=> '',
+				'user'=> 0
+		);
 // 		$this->menu[$r++]=array(
 // 				'fk_menu'=>'fk_mainmenu=commercial,fk_leftmenu=abonnement', //On utilise les ancres définis dans le menu parent déclaré au dessus
 // 				'type'=> 'left', // Toujours un menu gauche

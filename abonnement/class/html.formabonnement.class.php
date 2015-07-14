@@ -108,97 +108,258 @@ class FormAbonnement extends Form
 		}
 	}
 
-    function envoiEmailUser($userSend,$password) {
-    	global $user,$langs,$db;
-    	require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');
-    	include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
-    	$formmail = new FormMail($db);
-    	$msgishtml=0;
-    	// Get message template
-    	$arraydefaultmessage=$this->getEMailTemplate($db, 'user_abonne_create', $user, $langs);
-    	$mesg =$arraydefaultmessage ['content'];
-    	$mesg = make_substitutions($mesg, $this->SubTemplateUser($userSend,$password));
-    	$subject  =$arraydefaultmessage ['topic'];
-    	$from = ($conf->notification->email_from)?$conf->notification->email_from:$user->email;
-    	$mailfile = new CMailFile(
-    			$subject,
-    			$userSend->email,
-    			$from,
-    			$mesg,
-    			array(),
-    			array(),
-    			array(),
-    			'',
-    			'',
-    			0,
-    			$msgishtml
-    	);
-    	
-    	if ($mailfile->sendfile())
-    	{
-    		return 1;
-    	}
-    	else
-    	{ 
-    		$langs->trans("errors");
-    		$this->error=$langs->trans("ErrorFailedToSendPassword").' '.$mailfile->error;
-    		return -1;
-    	}
-    }
-    /**
-     *      Return template of email
-     *      Search into table c_email_templates
-     *
-     * 		@param	DoliDB		$db				Database handler
-     * 		@param	string		$type_template	Get message for key module
-     *      @param	string		$user			Use template public or limited to this user
-     *      @param	Translate	$outputlangs	Output lang object
-     *      @return array						array('topic'=>,'content'=>,..)
-     */
-    public function getEMailTemplate($db, $type_template, $user, $outputlangs)
-    {
-    	global $db;
-    	$ret=array();
-    
-    	$sql = "SELECT label, topic, content, lang";
-    	$sql.= " FROM ".MAIN_DB_PREFIX.'c_email_templates';
-    	$sql.= " WHERE type_template='".$db->escape($type_template)."'";
-    	$sql.= " AND entity IN (".getEntity("c_email_templates").")";
-    	$sql.= " AND (fk_user is NULL or fk_user = 0 or fk_user = ".$user->id.")";
-    	if (is_object($outputlangs)) $sql.= " AND (lang = '".$outputlangs->defaultlang."' OR lang IS NULL OR lang = '')";
-    	$sql.= $db->order("lang,label","ASC");
-    	
-    
-    	$resql = $db->query($sql);
-    	if ($resql)
-    	{
-    		$obj = $db->fetch_object($resql);	// Get first found
-    		if ($obj)
-    		{
-    			$ret['label']=$obj->label;
-    			$ret['topic']=$obj->topic;
-    			$ret['content']=$obj->content;
-    			$ret['lang']=$obj->lang;
-    		}
-    		
-    		$db->free($resql);
-    		return $ret;
-    	}
-    	else
-    	{
-    		dol_print_error($db);
-    		return -1;
-    	}
-    }
-    public function SubTemplateUser($userSub,$password) {
-    	$arr= array();
-    	if(is_object($userSub))
-    	$arr = array(
-				'__LOGIN__' => $userSub->login,
-				'__EMAIL__' => $userSub->email,
-				'__PASSWORD__' => $password,
-				'__URL__' => $urlwithroot
+	function envoiEmailUser($userSend,$password) {
+		global $user,$langs,$db;
+		require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');
+		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+		$formmail = new FormMail($db);
+		$msgishtml=0;
+		// Get message template
+		$arraydefaultmessage=$this->getEMailTemplate($db, 'user_abonne_create', $user, $langs);
+		$mesg =$arraydefaultmessage ['content'];
+		$mesg = make_substitutions($mesg, $this->SubTemplateUser($userSend,$password));
+		$subject  =$arraydefaultmessage ['topic'];
+		$from = ($conf->notification->email_from)?$conf->notification->email_from:$user->email;
+		$mailfile = new CMailFile(
+				$subject,
+				$userSend->email,
+				$from,
+				$mesg,
+				array(),
+				array(),
+				array(),
+				'',
+				'',
+				0,
+				$msgishtml
 		);
-    	return $arr;
-    }
+		 
+		if ($mailfile->sendfile())
+		{
+			return 1;
+		}
+		else
+		{
+			$langs->trans("errors");
+			$this->error=$langs->trans("ErrorFailedToSendPassword").' '.$mailfile->error;
+			return -1;
+		}
+	}
+	/**
+	 *      Return template of email
+	 *      Search into table c_email_templates
+	 *
+	 * 		@param	DoliDB		$db				Database handler
+	 * 		@param	string		$type_template	Get message for key module
+	 *      @param	string		$user			Use template public or limited to this user
+	 *      @param	Translate	$outputlangs	Output lang object
+	 *      @return array						array('topic'=>,'content'=>,..)
+	 */
+	public function getEMailTemplate($db, $type_template, $user, $outputlangs)
+	{
+		global $db;
+		$ret=array();
+
+		$sql = "SELECT label, topic, content, lang";
+		$sql.= " FROM ".MAIN_DB_PREFIX.'c_email_templates';
+		$sql.= " WHERE type_template='".$db->escape($type_template)."'";
+		$sql.= " AND entity IN (".getEntity("c_email_templates").")";
+		$sql.= " AND (fk_user is NULL or fk_user = 0 or fk_user = ".$user->id.")";
+		if (is_object($outputlangs)) $sql.= " AND (lang = '".$outputlangs->defaultlang."' OR lang IS NULL OR lang = '')";
+		$sql.= $db->order("lang,label","ASC");
+		 
+
+		$resql = $db->query($sql);
+		if ($resql)
+		{
+			$obj = $db->fetch_object($resql);	// Get first found
+			if ($obj)
+			{
+				$ret['label']=$obj->label;
+				$ret['topic']=$obj->topic;
+				$ret['content']=$obj->content;
+				$ret['lang']=$obj->lang;
+			}
+			else
+			{
+				$defaultmessage='';
+				if     ($type_template=='facture_send')	            {
+					$defaultmessage=$outputlangs->transnoentities("PredefinedMailContentSendInvoice");
+				}
+				elseif ($type_template=='facture_relance')			{
+					$defaultmessage=$outputlangs->transnoentities("PredefinedMailContentSendInvoiceReminder");
+				}
+				elseif ($type_template=='propal_send')				{
+					$defaultmessage=$outputlangs->transnoentities("PredefinedMailContentSendProposal");
+				}
+				elseif ($type_template=='order_send')				{
+					$defaultmessage=$outputlangs->transnoentities("PredefinedMailContentSendOrder");
+				}
+				elseif ($type_template=='order_supplier_send')		{
+					$defaultmessage=$outputlangs->transnoentities("PredefinedMailContentSendSupplierOrder");
+				}
+				elseif ($type_template=='invoice_supplier_send')	{
+					$defaultmessage=$outputlangs->transnoentities("PredefinedMailContentSendSupplierInvoice");
+				}
+				elseif ($type_template=='shipping_send')			{
+					$defaultmessage=$outputlangs->transnoentities("PredefinedMailContentSendShipping");
+				}
+				elseif ($type_template=='fichinter_send')			{
+					$defaultmessage=$outputlangs->transnoentities("PredefinedMailContentSendFichInter");
+				}
+				elseif ($type_template=='thirdparty')				{
+					$defaultmessage=$outputlangs->transnoentities("PredefinedMailContentThirdparty");
+				}
+			
+				$ret['label']='default';
+				$ret['topic']='';
+				$ret['content']=$defaultmessage;
+				$ret['lang']=$outputlangs->defaultlang;
+			}
+				
+
+			$db->free($resql);
+			return $ret;
+		}
+		else
+		{
+			dol_print_error($db);
+			return -1;
+		}
+	}
+	public function SubTemplateUser($userSub,$password) {
+		$arr= array();
+		if(is_object($userSub))
+			$arr = array(
+					'__LOGIN__' => $userSub->login,
+					'__EMAIL__' => $userSub->email,
+					'__PASSWORD__' => $password,
+					'__URL__' => $urlwithroot
+			);
+		return $arr;
+	}
+
+	public function genereDocument($object) {
+		global $langs;
+		$outputlangs = $langs;
+		$newlang = Null;
+		//$newlang = GETPOST('lang_id', 'alpha');
+		if ($conf->global->MAIN_MULTILANGS && empty($newlang))
+			$newlang = $object->thirdparty->default_lang;
+		if (! empty($newlang)) {
+			$outputlangs = new Translate("", $conf);
+			$outputlangs->setDefaultLang($newlang);
+		}
+		if(is_object($object)) {
+			 
+			$ret = $object->fetch($object->id); // Reload to get new records
+			$object->generateDocument($object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
+		}
+		 
+	}
+	function envoiEmailCommande($object,$password) {
+		global $user,$langs,$conf,$db;
+		require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');
+		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+		$formmail = new FormMail($db);
+		$msgishtml=0;
+		$ref = dol_sanitizeFileName($object->ref);
+		include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+		$fileparams = dol_most_recent_file($conf->commande->dir_output . '/' . $ref, preg_quote($ref, '/'));
+		$file = $fileparams ['fullname'];
+		
+		// Define output language
+		$outputlangs = $langs;
+		$newlang = '';
+		if ($conf->global->MAIN_MULTILANGS && empty($newlang) && ! empty($_REQUEST['lang_id']))
+			$newlang = $_REQUEST['lang_id'];
+		if ($conf->global->MAIN_MULTILANGS && empty($newlang))
+			$newlang = $object->thirdparty->default_lang;
+		
+		if (!empty($newlang))
+		{
+			$outputlangs = new Translate('', $conf);
+			$outputlangs->setDefaultLang($newlang);
+			$outputlangs->load('commercial');
+		}
+		///
+		//var_dump($file);exit;
+		$mime = 'application/pdf';
+		if (dol_is_file($file))
+		{
+			$object->fetch_thirdparty();
+			$sendto = $object->thirdparty->email;
+			//
+// 			$liste = array();
+// 			foreach ($object->thirdparty->thirdparty_and_contact_email_array(1) as $key => $value)
+// 				$liste [$key] = $value;
+
+			if (dol_strlen($sendto))
+			{
+				$langs->load("commercial");
+				$from = $user->getFullName($langs) . ' <' . $user->email .'>';
+				$replyto = $from;
+			
+				$sendtobcc = $conf->global->MAIN_EMAIL_USECCC;
+				if (empty($object->ref_client)) {
+					$topic = $outputlangs->trans('SendOrderRef', '__ORDERREF__');
+				} else if (! empty($object->ref_client)) {
+					$topic  = $outputlangs->trans('SendOrderRef', '__ORDERREF__ (__REFCLIENT__)');
+				}	
+				// Get message template
+				$arraydefaultmessage=$this->getEMailTemplate($db, 'order_send', $user, $langs);
+				$mesg =$arraydefaultmessage ['content'];
+				$substit ['__ORDERREF__'] = $object->ref;
+				$substit ['__SIGNATURE__'] = $user->signature;
+				$substit ['__REFCLIENT__'] = $object->ref_client;
+				$substit ['__THIRPARTY_NAME__'] = $object->thirdparty->name;
+				$substit ['__CONTACTCIVNAME__'] = $object->thirdparty->name;
+				$substit ['__PERSONALIZED__'] = $object->thirdparty->name;
+				
+				$mesg = make_substitutions($mesg, $substit);
+				$subject  =$arraydefaultmessage ['topic'];
+				$topic = make_substitutions($topic, $substit);
+				// Create form object
+				$attachedfiles=array('paths'=>array($file), 'names'=>array($filename), 'mimes'=>array($mime));
+				$filepath = $attachedfiles['paths'];
+				$filename = $attachedfiles['names'];
+				$mimetype = $attachedfiles['mimes'];
+				
+				//$from = ($conf->notification->email_from)?$conf->notification->email_from:$user->email;
+				$mailfile = new CMailFile(
+						$topic,
+						$sendto,
+						$from,
+						$mesg,
+						$filepath,
+						$mimetype,
+						$filename,
+						$sendtocc,
+						$sendtobcc,
+						$deliveryreceipt,
+						-1);
+				
+				
+				
+				
+				
+					
+				if ($mailfile->sendfile())
+				{
+					return 1;
+				}
+				else
+				{
+					$langs->trans("errors");
+					$this->error=$langs->trans("ErrorFailedToSendPassword").' '.$mailfile->error;
+					return -1;
+				}		
+			}
+		}
+		
+	
+		
+		
+
+	}
 }

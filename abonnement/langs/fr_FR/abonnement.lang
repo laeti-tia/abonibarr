@@ -32,7 +32,7 @@ AbonnementSetupPage = Page de réglages du module Abonnement
 AbonnementNbDayDefaultClosure = Nombre de jours à ajouter à la date du jour pour obtenir la date de clôture par défaut
 AbonnementAdmVar=Administration
 AbonnementUserGroupAffect = Limiter les utilisateurs affectables à une affaire au groupe
-AbonnementAUT = Relance Automatique
+AbonnementAUT = Abonnement Automatique
 NBAbonnement = Nombre de relance
 NBRE_JOURS_AVANT_RENOUVELLEMENT = Nombre de jours avant le renouvellement de l'abonnement
 
