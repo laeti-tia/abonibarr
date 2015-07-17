@@ -274,6 +274,44 @@ class modAbonnement extends DolibarrModules
 				'target'=> '',
 				'user'=> 0
 		);
+		
+		$r++;
+		
+		
+		$this->menu[$r++]=array(
+				'fk_menu'=>'fk_mainmenu=tools', //On utilise les ancres définis dans le menu parent déclaré au dessus
+				'type'=> 'left', // Toujours un menu gauche
+				'titre'=> 'AbonImportReleve',
+				'mainmenu'=> 'tools',
+				'leftmenu'=> 'importpaiement', // On n'indique rien ici car on ne souhaite pas intégrer de sous-menus à ce menu
+				'url'=> '/abonnement/import.php',
+				'langs'=> 'abonnement@abonnement',
+				'position'=> 1013,
+				'enabled'=> '1',
+				'perms'=> '',
+				'target'=> '',
+				'user'=> 0
+		);
+		$r++;
+		
+		
+		$this->menu[$r++]=array(
+				'fk_menu'=>'fk_mainmenu=tools,fk_leftmenu=importpaiement', //On utilise les ancres définis dans le menu parent déclaré au dessus
+				'type'=> 'left', // Toujours un menu gauche
+				'titre'=> 'AbonImportReleveNouveau',
+				'mainmenu'=> 'tools',
+				'leftmenu'=> '', // On n'indique rien ici car on ne souhaite pas intégrer de sous-menus à ce menu
+				'url'=> '/abonnement/import.php',
+				'langs'=> 'abonnement@abonnement',
+				'position'=> 1014,
+				'enabled'=> '1',
+				'perms'=> '',
+				'target'=> '',
+				'user'=> 0
+		);
+		
+		$r++;
+		
 // 		$this->menu[$r++]=array(
 // 				'fk_menu'=>'fk_mainmenu=commercial,fk_leftmenu=abonnement', //On utilise les ancres définis dans le menu parent déclaré au dessus
 // 				'type'=> 'left', // Toujours un menu gauche
@@ -306,6 +344,33 @@ class modAbonnement extends DolibarrModules
 		// $this->export_sql_end[$r] .=' WHERE f.fk_soc = s.rowid AND f.rowid = fd.fk_facture';
 		// $this->export_sql_order[$r] .=' ORDER BY s.nom';
 		// $r++;
+		
+		// Imports
+		//--------
+		$r=0;
+		
+		$now=dol_now();
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+		
+		$r++; 
+		$this->import_code[$r]=$this->rights_class.'_'.$r;
+		$this->import_label[$r]="Virement Abonnement"; // Translation key
+		$this->import_icon[$r]=$this->picto;
+		$this->import_entities_array[$r]=array();		// We define here only fields that use another icon that the one defined into import_icon
+		$this->import_tables_array[$r]=array('a'=>MAIN_DB_PREFIX.'paiement','cmd'=>MAIN_DB_PREFIX.'commande','soc'=>MAIN_DB_PREFIX.'societe');
+		$this->import_tables_creator_array[$r]=array('a'=>'fk_user_author');    // Fields to store import user id
+		//		$this->import_fields_array[$r]=array('a.civility'=>"UserTitle",'a.lastname'=>"Lastname*",'a.firstname'=>"Firstname",'a.login'=>"Login*","a.pass"=>"Password","a.fk_adherent_type"=>"MemberType*",'a.morphy'=>'Nature*','a.societe'=>'Company','a.address'=>"Address",'a.zip'=>"Zip",'a.town'=>"Town",'a.state_id'=>'StateId','a.country'=>"CountryId",'a.phone'=>"PhonePro",'a.phone_perso'=>"PhonePerso",'a.phone_mobile'=>"PhoneMobile",'a.email'=>"Email",'a.birth'=>"Birthday",'a.statut'=>"Status*",'a.photo'=>"Photo",'a.note'=>"Note",'a.datec'=>'DateCreation','a.datefin'=>'DateEndSubscription');
+		
+		$this->import_fields_array[$r]=array('cmd.ref'=>"Ref*",'cmd.socid'=>"Ref_client*",'soc.lastname'=>"Lastname",'soc.firstname'=>"Firstname",'a.amont'=>"AmountTTC*",'a.banque'=>'Bank*');
+		
+		
+		//$this->import_fieldshidden_array[$r]=array('extra.fk_object'=>'lastrowid-'.MAIN_DB_PREFIX.'adherent');    // aliastable.field => ('user->id' or 'lastrowid-'.tableparent)
+		//$this->import_regex_array[$r]=array('cmd.ref'=>'ref@'.MAIN_DB_PREFIX.'commande','a.datepaye'=>'^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$');
+		
+		$this->import_regex_array[$r]=array('cmd.ref'=>'ref@'.MAIN_DB_PREFIX.'commande');
+		$this->import_examplevalues_array[$r]=array('cmd.ref'=>"C000-001",'cmd.socid'=>"0001",'soc.lastname'=>"Gland",'soc.firstname'=>"julia",'a.amont'=>"1000",'a.banque'=>'SGB');
+		
+		
 	}
 
 	/**

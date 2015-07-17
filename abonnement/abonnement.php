@@ -28,10 +28,34 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
 require_once DOL_DOCUMENT_ROOT.'/abonnement/class/html.formabonnement.class.php';
+require_once DOL_DOCUMENT_ROOT.'/abonnement/class/abonnement.class.php';
 
 
 $action = GETPOST('action', 'alpha');
+
+
 $formabonne = new FormAbonnement($db);
+$abonne = new Abonnement($db);
+
+//$facture = new Facture($db);
+//$facture->fetch(75);
+//$re=$abonne->paiementFacture($facture, '121', '1223', '1');
+//var_dump($abonne->errors,$re);
+//exit;
+ $cmd = new Commande($db);
+ $cmd->fetch(10);
+// $re = $cmd->valid($user);
+$re = $abonne->createInvoiceAndContratFromCommande($cmd);
+var_dump($abonne->errors,$re);
+exit;
+// $cmd = new Commande($db);
+// $cmd->fetch(28);
+// $cmd->update($user);
+// var_dump($cmd->total_ht);
+// var_dump($cmd->total_ttc);
+// var_dump($cmd->total_tva);
+
+// exit;
 
 if($action == 'add') {
 	$error = 0;
@@ -81,19 +105,21 @@ if($action == 'add') {
 	{
 		$langs->load("errors");
 		$error++; $errors[] = $object->error;
-		var_dump($object->errors);exit;
+		//var_dump($object->errors);exit;
 	}
 	
 	$commande = new Commande($db);
 	$commande->socid = $object->id;
 	$commande->date_commande = dol_now();
+	$commande->statut = 0;
+	
 	$commande->add_product($idpd, 1);
+	
 	$result = $commande->create($user);
 	if ($result < 0)
 	{
 		$langs->load("errors");
 		$error++; $errors[] = $commande->error;
-		var_dump($object->errors);exit;
 	}
 	$formabonne->genereDocument($commande);
 	if(is_object($commande)) {
@@ -102,6 +128,10 @@ if($action == 'add') {
 	if(!$error) {
 		$db->commit();
 		setEventMessage('Client ajouté avec succès','msg');
+		$url = DOL_URL_ROOT.'/societe/soc.php?socid='.$object->id;
+		header("Location: ".$url);
+		exit;
+		
 		
 	} else {
 		$msgs = '';

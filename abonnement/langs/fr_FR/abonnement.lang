@@ -66,6 +66,8 @@ AbonnementListMyLead=Mes Abonnements
 AbonnementListLate=Abonnements en retard
 ABON_NBRE_JOURS = Nbre Jours
 AddAbonne = Ajouter un abonné
+AbonImportReleve = Import relevé de compte
+AbonImportReleveNouveau = Nouvel import
 
 #
 # Status

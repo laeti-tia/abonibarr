@@ -356,10 +356,72 @@ class FormAbonnement extends Form
 				}		
 			}
 		}
-		
+	}
+	/**
+	 *  Return a HTML select list of bank accounts
+	 *
+	 *  @param	string	$selected          Id account pre-selected
+	 *  @param  string	$htmlname          Name of select zone
+	 *  @param  int		$statut            Status of searched accounts (0=open, 1=closed, 2=both)
+	 *  @param  string	$filtre            To filter list
+	 *  @param  int		$useempty          1=Add an empty value in list, 2=Add an empty value in list only if there is more than 2 entries.
+	 *  @param  string	$moreattrib        To add more attribute on select
+	 * 	@return	void
+	 */
+	function select_comptes($selected='',$htmlname='accountid',$statut=0,$filtre='',$useempty=0,$moreattrib='')
+	{
+		global $langs, $conf;
 	
-		
-		
-
+		$langs->load("admin");
+	
+		$sql = "SELECT rowid, label, bank, clos as status";
+		$sql.= " FROM ".MAIN_DB_PREFIX."bank_account";
+		$sql.= " WHERE entity IN (".getEntity('bank_account', 1).")";
+		if ($statut != 2) $sql.= " AND clos = '".$statut."'";
+		if ($filtre) $sql.=" AND ".$filtre;
+		$sql.= " ORDER BY label";
+	    $out = '';
+		dol_syslog(get_class($this)."::select_comptes", LOG_DEBUG);
+		$result = $this->db->query($sql);
+		if ($result)
+		{
+			$num = $this->db->num_rows($result);
+			$i = 0;
+			if ($num)
+			{
+				$out .=  '<select id="select'.$htmlname.'" class="flat selectbankaccount" name="'.$htmlname.'"'.($moreattrib?' '.$moreattrib:'').'>';
+				if ($useempty == 1 || ($useempty == 2 && $num > 1))
+				{
+					$out .= '<option value="-1">&nbsp;</option>';
+				}
+	
+				while ($i < $num)
+				{
+					$obj = $this->db->fetch_object($result);
+					if ($selected == $obj->rowid)
+					{
+						$out .= '<option value="'.$obj->rowid.'" selected="selected">';
+					}
+					else
+					{
+						$out .= '<option value="'.$obj->rowid.'">';
+					}
+					$out .= $obj->label;
+					if ($statut == 2 && $obj->status == 1) $out .= ' ('.$langs->trans("Closed").')';
+					$out .= '</option>';
+					$i++;
+				}
+				$out .= "</select>";
+				
+			}
+			else
+			{
+				$out .= $langs->trans("NoActiveBankAccountDefined");
+			}
+		}
+		else {
+			dol_print_error($this->db);
+		}
+		return $out;
 	}
 }
