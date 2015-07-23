@@ -59,7 +59,10 @@ class Abonnement
 		$paiement->num_paiement = $numCh;
 		$paiement->note         = 'paiement par lot';
 		$res = $paiement->create($user,1);
-		if(!$res) $this->errors = $paiement->errors;
+		if(!$res) {
+			$this->errors = $paiement->errors;
+			return $res;
+		}
 		$label='(CustomerInvoicePayment)';
 		$tiers = new Societe($db);
 		$tiers->fetch($facture->socid);
@@ -67,7 +70,7 @@ class Abonnement
 		
 		if(!$result) $this->errors = $paiement->errors;
 		
-		return $res ;
+		return $result ;
 	}
 
 	function createInvoiceAndContratFromCommande($object,$montantPaie=0,$numCh=1,$id_accound=1) {

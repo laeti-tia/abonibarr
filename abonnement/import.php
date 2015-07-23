@@ -1109,15 +1109,17 @@ if ($step == 5 && $datatoimport)
 			}
 			if ($excludefirstline && $sourcelinenb == 1) continue;
 			
-			$montant = $arrayrecord[6]['val'];
-			$devise = $arrayrecord[7]['val'];
-			$datepaiement = $arrayrecord[4]['val'];
+			
 			$libelle = $arrayrecord[8]['val'];
 			//echo '<br>'.$montant;
 			//($montant=floatval(str_replace(',', '.', $montant)));
 			$resp =CommStructure::isCommStructure($libelle);
 			//var_dump($resp['response']);
 			if($resp['response']) {
+				$montant = $arrayrecord[6]['val'];
+				$montant = floatval(str_replace(',', '.', $montant));
+				$devise = $arrayrecord[7]['val'];
+				$datepaiement = $arrayrecord[4]['val'];
 				$refCmdComm = $resp['matches'][0];
 				$nbreCommStructure[] =array('devise'=>$devise,'montant'=>$montant,
 						'datepaiement'=>$datepaiement,'comm'=>$resp['matches'][0]);
