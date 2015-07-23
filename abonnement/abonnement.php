@@ -37,17 +37,33 @@ $action = GETPOST('action', 'alpha');
 $formabonne = new FormAbonnement($db);
 $abonne = new Abonnement($db);
 
+//  $cmd = new Commande($db);
+//  $cmd->fetch(88);
+// // $re = $cmd->valid($user);
+// $re = $abonne->createInvoiceAndContratFromCommande($cmd,101,'1','1');
+// var_dump($abonne->errors,$re);
+// exit;
+
+
+// $facture = new Facture($db);
+// $facture->fetch(108);
+// $formabonne->envoiEmailFacture($facture, '');
+// exit;
+// $contrat = new Contrat($db);
+// $contrat->fetch(89);
+// $abonne->createLoginAbonne($contrat);
+
 //$facture = new Facture($db);
 //$facture->fetch(75);
 //$re=$abonne->paiementFacture($facture, '121', '1223', '1');
 //var_dump($abonne->errors,$re);
 //exit;
- $cmd = new Commande($db);
- $cmd->fetch(10);
-// $re = $cmd->valid($user);
-$re = $abonne->createInvoiceAndContratFromCommande($cmd);
-var_dump($abonne->errors,$re);
-exit;
+//  $cmd = new Commande($db);
+//  $cmd->fetch(10);
+// // $re = $cmd->valid($user);
+// $re = $abonne->createInvoiceAndContratFromCommande($cmd);
+// var_dump($abonne->errors,$re);
+// exit;
 // $cmd = new Commande($db);
 // $cmd->fetch(28);
 // $cmd->update($user);
@@ -112,19 +128,22 @@ if($action == 'add') {
 	$commande->socid = $object->id;
 	$commande->date_commande = dol_now();
 	$commande->statut = 0;
+	$commande->fetch_thirdparty();
 	
 	$commande->add_product($idpd, 1);
-	
 	$result = $commande->create($user);
 	if ($result < 0)
 	{
 		$langs->load("errors");
 		$error++; $errors[] = $commande->error;
 	}
+	$commande->valid($user);
 	$formabonne->genereDocument($commande);
+	
 	if(is_object($commande)) {
 		$formabonne->envoiEmailCommande($commande,'');
 	}
+	
 	if(!$error) {
 		$db->commit();
 		setEventMessage('Client ajouté avec succès','msg');

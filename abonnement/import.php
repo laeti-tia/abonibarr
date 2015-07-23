@@ -32,14 +32,23 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/import.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/abonnement/class/html.formabonnement.class.php';
+require_once DOL_DOCUMENT_ROOT.'/abonnement/class/communication_structure.class.php';
+require_once DOL_DOCUMENT_ROOT.'/abonnement/class/abonnement.class.php';
+require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+
 
 $langs->load("exports");
 $langs->load("compta");
 $langs->load("errors");
 
+
 // Security check
 $result=restrictedArea($user, 'import');
 
+// $abonne = new Abonnement($db);
+// $cmd = new Commande($db);
+// $abonne->updateExtrafieldsCommande($cmd, array());
+// exit;
 
 $datatoimport		= GETPOST('datatoimport');
 $format				= GETPOST('format');
@@ -59,7 +68,11 @@ $objimport->load_arrays($user,$datatoimport);
 //var_dump($objimport);exit;
 $datatoimport='abonnement_1';
 $objmodelimport=new ModeleImports();
-
+// $t = "VirementBusiness***007/9867/01629***'BankOn-line-61,71Vers:GROUPES-BE91000000143476Communication:/***007/9867/01629***";
+// $reg = '#((\*){3})([0-9]{3})/([0-9]{4})/([0-9]{5})(\*){3}#';
+// $rep = preg_match($reg, $t,$match);
+// var_dump($match,$rep);exit;
+// $resp =CommStructure::isCommStructure($expression);
 $form = new Form($db);
 $htmlother = new FormOther($db);
 $formfile = new FormFile($db);
@@ -68,16 +81,46 @@ $formAbonn = new FormAbonnement($db);
 $serialized_array_match_file_to_database=isset($_SESSION["dol_array_match_file_to_database"])?$_SESSION["dol_array_match_file_to_database"]:'';
 $array_match_file_to_database=array();
 $fieldsarray=explode(',',$serialized_array_match_file_to_database);
-foreach($fieldsarray as $elem)
-{
-	$tabelem=explode('=',$elem,2);
-	$key=$tabelem[0];
-	$val=(isset($tabelem[1])?$tabelem[1]:'');
-	if ($key && $val)
-	{
-		$array_match_file_to_database[$key]=$val;
-	}
+
+function entete_import ($step,$param ) {
+	global $langs;
+	$titleofmodule ='Abonnement';
+	llxHeader('',$langs->trans("NewImport"),'EN:Module_Imports_En|FR:Module_Imports|ES:M&oacute;dulo_Importaciones');
+
+	$head = import_prepare_head1($param,$step);
+
+	dol_fiche_head($head, 'step'.$step, $langs->trans("NewImport"));
+
+
+	print '<table width="100%" class="border">';
+
+	// Module
+	print '<tr><td width="25%">'.$langs->trans("Module").'</td>';
+	print '<td>';
+	// Special cas for import common to module/services
+	print $titleofmodule;
+	print '</td></tr>';
+
+	// Lot de donnees a importer
+	print '<tr><td width="25%">'.$langs->trans("Operation").'</td>';
+	print '<td>Paiement des commandes d\'abonnement';
+	//print img_object($objimport->array_import_module[0]->getName(),$objimport->array_import_icon[0]).' ';
+	//print $objimport->array_import_label[0];
+	print '</td></tr>';
+
+	print '</table>';
+	print '<br>'."\n";
 }
+// foreach($fieldsarray as $elem)
+// {
+// 	$tabelem=explode('=',$elem,2);
+// 	$key=$tabelem[0];
+// 	$val=(isset($tabelem[1])?$tabelem[1]:'');
+// 	if ($key && $val)
+// 	{
+// 		$array_match_file_to_database[$key]=$val;
+// 	}
+// }
 
 
 /*
@@ -316,6 +359,8 @@ function import_prepare_head1($param, $maxstep=0)
 
 	return $head;
 }
+
+ 
 //var_dump($step);exit;
 // STEP 2: Page to select input format file
 if ($step == 1 )
@@ -331,35 +376,8 @@ if ($step == 1 )
 	if ($excludefirstline) $param.='&excludefirstline=1';
 	if ($separator) $param.='&separator='.urlencode($separator);
 	if ($enclosure) $param.='&enclosure='.urlencode($enclosure);
-
-	llxHeader('',$langs->trans("NewImport"),'EN:Module_Imports_En|FR:Module_Imports|ES:M&oacute;dulo_Importaciones');
-
-    $head = import_prepare_head1($param,1);
-
-	dol_fiche_head($head, 'step2', $langs->trans("NewImport"));
-
-
-	print '<table width="100%" class="border">';
-
-	// Module
-	print '<tr><td width="25%">'.$langs->trans("Module").'</td>';
-	print '<td>';
-	$titleofmodule=$objimport->array_import_module[0]->getName();
-	// Special cas for import common to module/services
-	if (in_array($objimport->array_import_code[0], array('produit_supplierprices','produit_multiprice'))) $titleofmodule=$langs->trans("ProductOrService");
-	print $titleofmodule;
-	print '</td></tr>';
-
-	// Lot de donnees a importer
-	print '<tr><td width="25%">'.$langs->trans("DatasetToImport").'</td>';
-	print '<td>';
-	print img_object($objimport->array_import_module[0]->getName(),$objimport->array_import_icon[0]).' ';
-	print $objimport->array_import_label[0];
-	print '</td></tr>';
-
-	print '</table>';
-	print '<br>'."\n";
-
+	
+	entete_import($step,$param);
 
 	print '<form name="userfile" action="'.$_SERVER["PHP_SELF"].'" enctype="multipart/form-data" METHOD="POST">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -376,20 +394,22 @@ if ($step == 1 )
 	print $langs->trans("FileMustHaveOneOfFollowingFormat");
 	print '</td></tr>';
 	$liste=$objmodelimport->liste_modeles($db);
-	foreach($liste as $key)
-	{
+	$key ='csv';
+	$pictkey =  "mime/other";
+	 
 		$var=!$var;
 		print '<tr '.$bc[$var].'>';
-		print '<td width="16">'.img_picto_common($key,$objmodelimport->getPictoForKey($key)).'</td>';
-    	$text=$objmodelimport->getDriverDescForKey($key);
-    	print '<td>'.$form->textwithpicto($objmodelimport->getDriverLabelForKey($key),$text).'</td>';
-		print '<td align="center"><a href="'.DOL_URL_ROOT.'/imports/emptyexample.php?format='.$key.$param.'" target="_blank">'.$langs->trans("DownloadEmptyExample").'</a></td>';
+		print '<td width="16">'.img_picto_common($key,$pictkey).'</td>';
+    	
+    	print '<td>'.'CSV'.'</td>';
+		print '<td align="center">
+		<a href="'.DOL_URL_ROOT.'/imports/emptyexample.php?format='.$key.$param.'" target="_blank">'.$langs->trans("DownloadEmptyExample").'</a></td>';
 		// Action button
 		print '<td align="right">';
 		print '<a href="'.$_SERVER["PHP_SELF"].'?step=2&format='.$key.$param.'">'.img_picto($langs->trans("SelectFormat"),'filenew').'</a>';
 		print '</td>';
 		print '</tr>';
-	}
+	
 
 	print '</table></form>';
 
@@ -428,9 +448,6 @@ if ($step == 2 && $datatoimport)
 	// Module
 	print '<tr><td width="25%">'.$langs->trans("Module").'</td>';
 	print '<td>';
-	$titleofmodule=$objimport->array_import_module[0]->getName();
-	// Special cas for import common to module/services
-	if (in_array($objimport->array_import_code[0], array('produit_supplierprices','produit_multiprice'))) $titleofmodule=$langs->trans("ProductOrService");
 	print $titleofmodule;
 	print '</td></tr>';
 
@@ -546,6 +563,7 @@ if ($step == 3 && $datatoimport)
 	$classname = "Import".ucfirst($model);
 	require_once $dir.$file;
 	$obj = new $classname($db,$datatoimport);
+	$separator=";";
 	if ($model == 'csv') {
 	    $obj->separator = $separator;
 	    $obj->enclosure = $enclosure;
@@ -567,7 +585,7 @@ if ($step == 3 && $datatoimport)
 		}
 		$obj->import_close_file();
 	}
-
+   // var_dump($arrayrecord);exit;
 	// Load targets fields in database
 	$fieldstarget=$objimport->array_import_fields[0];
 
@@ -735,9 +753,12 @@ if ($step == 4 && $datatoimport)
 	    $obj->separator = $separator;
 	    $obj->enclosure = $enclosure;
 	}
+	
 
 	// Load source fields in input file
 	$fieldssource=array();
+	$nbreCommStructure = array();
+	$nboflines=dol_count_nb_of_line($conf->import->dir_temp.'/'.$filetoimport);
 	$result=$obj->import_open_file($conf->import->dir_temp.'/'.$filetoimport,$langs);
 	if ($result >= 0)
 	{
@@ -745,16 +766,62 @@ if ($step == 4 && $datatoimport)
 		$arrayrecord=$obj->import_read_record();
 		// Put into array fieldssource starting with 1.
 		$i=1;
+		//echo '<pre>';var_dump($arrayrecord);
 		foreach($arrayrecord as $key => $val)
 		{
-			$fieldssource[$i]['example1']=dol_trunc($val['val'],24);
+			$fieldssource[$i]=dol_trunc($val['val'],24);
 			$i++;
 		}
+		
 		$obj->import_close_file();
 	}
-
-	$nboflines=dol_count_nb_of_line($conf->import->dir_temp.'/'.$filetoimport);
-
+	$iligne=1;
+	$result=$obj->import_open_file($conf->import->dir_temp.'/'.$filetoimport,$langs);
+	
+	while ($sourcelinenb < $nboflines && ! $endoffile)
+	{
+		$iligne++;
+		$errors =array();
+		// Read line and stor it into $arrayrecord
+		$arrayrecord=$obj->import_read_record();
+		//var_dump($arrayrecord);
+		if ($arrayrecord === false)
+		{
+			$arrayofwarnings[$iligne][0]=array('lib'=>'File has '.$nboflines.' lines. However we reach end of file after record '.$sourcelinenb.'. This may occurs when some records are split onto several lines.','type'=>'EOF_RECORD_ON_SEVERAL_LINES');
+			$endoffile++;
+			continue;
+		}
+		if ($excludefirstline && $iligne == 1) continue;
+		$montant = $arrayrecord[6]['val'];
+				$devise = $arrayrecord[7]['val'];
+				$datepaiement = $arrayrecord[4]['val'];
+				$libelle = $arrayrecord[8]['val'];
+				//echo '<br>';
+				//($montant=floatval(str_replace(',', '.', $montant)));
+				$resp =CommStructure::isCommStructure($libelle);
+				if($resp['response']) {
+					$nbreCommStructure[] =array('devise'=>$devise,'montant'=>$montant,
+							'$datepaiement'=>$datepaiement,'comm'=>$resp['matches'][0]);
+				}
+			
+	}
+	
+	//var_dump($nbreCommStructure,'jjj');
+	//exit;
+// 	for($iligne=0;$iligne<$nboflines;$iligne++){
+// 		// Read first line
+// 		$arrayrecord=$obj->import_read_record();
+// 		echo '<pre>';var_dump($arrayrecord);
+// 		$montant = $arrayrecord[6];
+// 		$devise = $arrayrecord[7];
+// 		$datepaiement = $arrayrecord[4];
+// 		$libelle = $arrayrecord[8];
+// 		echo '88888'.$libelle;
+// 	    //$resp =CommStructure::isCommStructure($expression);
+// 	}exit;
+	// 			var_dump($expression1,'communication valide');
+	
+ 
 	$param='&leftmenu=import&format='.$format.'&datatoimport='.$datatoimport.'&filetoimport='.urlencode($filetoimport).'&nboflines='.$nboflines.'&separator='.urlencode($separator).'&enclosure='.urlencode($enclosure);
 	$param2 = $param;
 	if ($excludefirstline) {
@@ -763,9 +830,9 @@ if ($step == 4 && $datatoimport)
 
 	llxHeader('',$langs->trans("NewImport"),'EN:Module_Imports_En|FR:Module_Imports|ES:M&oacute;dulo_Importaciones');
 
-    $head = import_prepare_head1($param,4);
+    $head = import_prepare_head1($param,$step);
 
-	dol_fiche_head($head, 'step4', $langs->trans("NewImport"));
+	dol_fiche_head($head, 'step'.$step, $langs->trans("NewImport"));
 
 	print '<form name="userfile" action="'.$_SERVER["PHP_SELF"].'" enctype="multipart/form-data" METHOD="POST">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -846,65 +913,25 @@ if ($step == 4 && $datatoimport)
 	print '<table width="100%" class="border">';
 	//print '<tr><td colspan="2"><b>'.$langs->trans("InformationOnTargetTables").'</b></td></tr>';
 
-	// Tables imported
-	print '<tr><td width="25%">';
-	print $langs->trans("TablesTarget");
-	print '</td><td>';
-	$listtables=array();
-	$sort_array_match_file_to_database=$array_match_file_to_database;
-	foreach($array_match_file_to_database as $code=>$label)
-	{
-		//var_dump($fieldssource);
-		if ($code > count($fieldssource)) continue;
-		//print $code.'-'.$label;
-		$alias=preg_replace('/(\..*)$/i','',$label);
-		$listtables[$alias]=$objimport->array_import_tables[0][$alias];
-	}
-	if (count($listtables))
-	{
-		$newval='';
-		//ksort($listtables);
-		foreach ($listtables as $val)
-		{
-			if ($newval) print ', ';
-			$newval=$val;
-			// Link to Dolibarr wiki pages
-			/*$helppagename='EN:Table_'.$newval;
-			if ($helppagename && empty($conf->global->MAIN_HELP_DISABLELINK))
-			{
-				// Get helpbaseurl, helppage and mode from helppagename and langs
-				$arrayres=getHelpParamFor($helppagename,$langs);
-				$helpbaseurl=$arrayres['helpbaseurl'];
-				$helppage=$arrayres['helppage'];
-				$mode=$arrayres['mode'];
-				$newval.=' <a href="'.sprintf($helpbaseurl,$helppage).'">'.img_picto($langs->trans($mode == 'wiki' ? 'GoToWikiHelpPage': 'GoToHelpPage'),DOL_URL_ROOT.'/theme/common/helpdoc.png','',1).'</a>';
-			}*/
-			print $newval;
-		}
-	}
-	else print $langs->trans("Error");
-	print '</td></tr>';
-
+	
 	// Fields imported
 	print '<tr><td>';
 	print $langs->trans("FieldsTarget").'</td><td>';
-	$listfields=array();
-	$i=0;
-	//print 'fieldsource='.$fieldssource;
-	$sort_array_match_file_to_database=$array_match_file_to_database;
-	ksort($sort_array_match_file_to_database);
-	//var_dump($sort_array_match_file_to_database);
-	foreach($sort_array_match_file_to_database as $code=>$label)
-	{
-		$i++;
-		//var_dump($fieldssource);
-		if ($code > count($fieldssource)) continue;
-		//print $code.'-'.$label;
-		$alias=preg_replace('/(\..*)$/i','',$label);
-		$listfields[$i]=$langs->trans("Field").' '.$code.'->'.$label;
+	$chaine='';
+	foreach ($fieldssource as $fieldcsv) { 
+		$chaine .= $fieldcsv.'->';
 	}
-	print count($listfields)?(join(', ',$listfields)):$langs->trans("Error");
+	echo $chaine;
 	print '</td></tr>';
+	
+	// Tables imported
+	print '<tr><td width="25%">';
+	print $langs->trans("Nombre de communication structurée .");
+	print '</td><td>';
+	print count($nbreCommStructure);
+	print '</td></tr>';
+	
+	
 	$step1 = $step+1;
 	print '<input type="hidden" value="'.$step1.'" name="step">';
 	print '<input type="hidden" value="'.$format.'" name="format">';
@@ -925,10 +952,11 @@ if ($step == 4 && $datatoimport)
     //    if ($user->rights->import->run)
     	
     //    {
-  print '<input type="submit" value="'.$langs->trans("RunImportFile").'" class="button" />';
-  
+    if(count($nbreCommStructure)>0)
+  print '<input type="submit" value="'.$langs->trans("Lancer l'import dans dolibarr").'" class="button" />';
+  else
            
-  //              print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?leftmenu=import&step=5&importid='.$importid.$param.'">'.$langs->trans("RunImportFile").'</a>';
+  print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'">'.$langs->trans("Retour").'</a>';
             
         //}
         
@@ -944,7 +972,6 @@ if ($step == 5 && $datatoimport)
 	$liste=$objmodelimport->liste_modeles($db);
 	$importid=$_REQUEST["importid"];
 
-
 	// Create classe to use for import
 	$dir = DOL_DOCUMENT_ROOT . "/core/modules/import/";
 	$file = "import_".$model.".modules.php";
@@ -955,7 +982,8 @@ if ($step == 5 && $datatoimport)
 	    $obj->separator = $separator;
 	    $obj->enclosure = $enclosure;
 	}
-
+	$separator=';';
+	$obj->separator =$separator;
 	// Load source fields in input file
 	$fieldssource=array();
 	$result=$obj->import_open_file($conf->import->dir_temp.'/'.$filetoimport,$langs);
@@ -964,6 +992,7 @@ if ($step == 5 && $datatoimport)
 		// Read first line
 		$arrayrecord=$obj->import_read_record();
 		// Put into array fieldssource starting with 1.
+		
 		$i=1;
 		foreach($arrayrecord as $key => $val)
 		{
@@ -972,7 +1001,7 @@ if ($step == 5 && $datatoimport)
 		}
 		$obj->import_close_file();
 	}
-
+	
 	$nboflines=(! empty($_GET["nboflines"])?$_GET["nboflines"]:dol_count_nb_of_line($conf->import->dir_temp.'/'.$filetoimport));
 
 	$param='&format='.$format.'&datatoimport='.$datatoimport.'&filetoimport='.urlencode($filetoimport).'&nboflines='.$nboflines;
@@ -1044,7 +1073,7 @@ if ($step == 5 && $datatoimport)
 	
 	//var_dump($array_match_file_to_database);
 	
-	$db->begin();
+	
 	$excludefirstline =1;
 	 //$sourcelinenb = 1;
 	
@@ -1052,6 +1081,7 @@ if ($step == 5 && $datatoimport)
 	$nbok=0;
 	$pathfile=$conf->import->dir_temp.'/'.$filetoimport;
 	$result=$obj->import_open_file($pathfile,$langs);
+	
 	if ($result > 0)
 	{
 		global $tablewithentity_cache;
@@ -1070,6 +1100,7 @@ if ($step == 5 && $datatoimport)
 			$errors =array();
 			// Read line and stor it into $arrayrecord
 			$arrayrecord=$obj->import_read_record();
+			;
 			if ($arrayrecord === false)
 			{
 				$arrayofwarnings[$sourcelinenb][0]=array('lib'=>'File has '.$nboflines.' lines. However we reach end of file after record '.$sourcelinenb.'. This may occurs when some records are split onto several lines.','type'=>'EOF_RECORD_ON_SEVERAL_LINES');
@@ -1078,38 +1109,69 @@ if ($step == 5 && $datatoimport)
 			}
 			if ($excludefirstline && $sourcelinenb == 1) continue;
 			
-			
+			$montant = $arrayrecord[6]['val'];
+			$devise = $arrayrecord[7]['val'];
+			$datepaiement = $arrayrecord[4]['val'];
+			$libelle = $arrayrecord[8]['val'];
+			//echo '<br>'.$montant;
+			//($montant=floatval(str_replace(',', '.', $montant)));
+			$resp =CommStructure::isCommStructure($libelle);
+			//var_dump($resp['response']);
+			if($resp['response']) {
+				$refCmdComm = $resp['matches'][0];
+				$nbreCommStructure[] =array('devise'=>$devise,'montant'=>$montant,
+						'datepaiement'=>$datepaiement,'comm'=>$resp['matches'][0]);
+			     
+				$i=0;
+				$abonne = new Abonnement($db);
+				$cmd = new Commande($db);
+				//$abonne->updateExtrafieldsCommande($cmd, array());
+				$refCmd = CommStructure::getRefcommande($refCmdComm);
+				//$refCmd = $arrayrecord[0] ["val"];
+				//$montant = $arrayrecord[5] ["val"];
+				//$bank = $arrayrecord[6] ["val"];
+				$re = $cmd->fetch(null,trim($refCmd)); 
+				//var_dump($refCmd);
+				if($re>0) {
+					$db->begin();
+				// $re = $cmd->valid($user);
 				
-			$i=0;
-			$abonne = new Abonnement($db);
-			$cmd = new Commande($db);
-			$refCmd = $arrayrecord[0] ["val"];
-			$montant = $arrayrecord[5] ["val"];
-			$bank = $arrayrecord[6] ["val"];
-			$re = $cmd->fetch(null,$refCmd); var_dump($cmd->id);
+				 $re = $abonne->createInvoiceAndContratFromCommande($cmd,abs($montant),'1',GETPOST('accountid'));
+				 //var_dump($re,'');exit;
+				 if(!$re) {
+				 	$errors[] =$abonne->errors;
+				 }	
+				 if (count($errors)>0) { 
+				 	$arrayoferrors[$sourcelinenb]=$errors;
+				 	$db->rollback();
+				 }
+				 //if (count($cmd->warnings)) $arrayofwarnings[$sourcelinenb]=$cmd->warnings;
+				 if (count($errors)<=0) {
+				 	$nbok++;
+				 	$db->commit();
+				 }
+				 
+				} else {
+					$errors[] ="La commande avec la reference <b> $refCmd</b> n'existe pas";
+				}
+				
+		}
+// 			require_once DOL_DOCUMENT_ROOT.'/abonnement/class/communication_structure.class.php';
+// 			$expression =CommStructure::generate('CO0501-0001');
+// 			var_dump($expression,'CO0501-0001');
 			
-			if($re>0) {
-			 $re = $cmd->valid($user);
-			 $re = $abonne->createInvoiceAndContratFromCommande($cmd,$montant,'1',$bank);
-			 var_dump($re);
-			 if(!$re) {
-			 	$errors[] =$abonne->errors;
-			 }
-			 
-			} else {
-				$errors[] ="La commande avec la reference <b> $refCmd</b> n'existe pas";
-			}
+// 			$expression1 =CommStructure::isCommStructure($expression);
+// 			var_dump($expression1,'communication valide');
+// 			$expression =CommStructure::getRefcommande($expression);
 			
-			
+// 			//$r = generate_structured_communication('0015070003');
+// 			var_dump($expression,'ref');exit;
 	
 			//
 			//$result=$obj->import_insert($arrayrecord,$array_match_file_to_database,$objimport,count($fieldssource),$importid);
 	
-			if (count($errors)>0)   $arrayoferrors[$sourcelinenb]=$errors;
-			//if (count($cmd->warnings)) $arrayofwarnings[$sourcelinenb]=$cmd->warnings;
-			if (count($errors)<=0) $nbok++;
-		}
-		 $db->commit();
+			
+		} 
 		// Close file
 		$obj->import_close_file();
 	}
@@ -1156,7 +1218,7 @@ if ($step == 5 && $datatoimport)
 	else print $langs->trans("NbOfLinesOK",$nbok).'</b><br><br>';
 	
 	print $langs->trans("NbOfLinesImported",$nbok).'</b><br><br>';
-	//print $langs->trans("FileWasImported",$importid).'<br>';
+	print $langs->trans("Nombre de communication structurée").' : '.count($nbreCommStructure).'<br>';
 	//print $langs->trans("YouCanUseImportIdToFindRecord",$importid).'<br>';
 	print '</center>';
 }
@@ -1263,3 +1325,4 @@ function getnewkey(&$fieldssource,&$listofkey)
 	$listofkey[$i]=1;
 	return $i;
 }
+

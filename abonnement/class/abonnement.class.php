@@ -5,6 +5,7 @@ require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
 require_once (DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 require_once (DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once (DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
+require_once (DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
 
 
 class Abonnement
@@ -15,10 +16,39 @@ class Abonnement
 	function __construct($db){
 		$this->db = $db;
 	}
+	function updateExtrafieldsCommandeCommStruture($objet) {
+		global $db;
+		$extrafields=new ExtraFields($db);
+		require_once (DOL_DOCUMENT_ROOT."/abonnement/class/communication_structure.class.php");
+			$extralabels=$extrafields->fetch_name_optionals_label('commande',true);
+		//
+		$arrData['options_comm_structure']=CommStructure::generate($objet->ref);
+		//var_dump(CommStructure::genera  te($objet->ref));exit;
+		$result = 1; $objet->array_options['options_comm_structure']=CommStructure::generate($objet->ref);
+		$objet->insertExtraFields();
+		
+		$objet->fetch_optionals($objet->id);
+		
+		return CommStructure::generate($objet->ref);
+	}
+	function updateExtrafieldsCommande($objet,$arrData) {
+		global $db;
+		$extrafields=new ExtraFields($db);
+		$extralabels=$extrafields->fetch_name_optionals_label('commande',true);
+		//var_dump($extralabels);
+		foreach($extrafields->attribute_label as $key=>$label)
+		{
+			$key='options_'.$key;
+			if (isset($arrData[$key]))
+			{
+				$result=$object->setValueFrom($key, $arrData[$key], 'commande_extrafields');
+			}
+		}
+	}
 	function createAbonne() {
 
 	}
-	function paiementFacture($facture,$montantPaie,$numCh,$id_accound=1) {
+	function paiementFacture($facture,$montantPaie,$numCh,$id_accound=NULL) {
 		global $db,$user;
 		//$facture = new Facture($db);
 		$paiement = new Paiement($db);
@@ -44,11 +74,12 @@ class Abonnement
 		global $db,$user;
 		$db->begin();
 		//$object = new Commande($db);
-		//$facture = new Facture($db);
+		$facture = new Facture($db);
 		// = new Contrat($db);
 		if(is_object($object)){
 				
 			$object->valid($user);
+			$cn = new commande($db); 
 			$contrat = $this->createContratFromCommande($object);
 			if (is_object($contrat) )
 			{
@@ -58,13 +89,24 @@ class Abonnement
 				if (is_object($facture) ) {
 					$facture->validate($user);
 					// paiement
-					$r = $this->paiementFacture($facture, $montantPaie, '1223', '1');
-					if(!$r) $erro++;
-					
-					//compte de banke
+					$r = $this->paiementFacture($facture, $montantPaie, $numCh, $id_accound);
+					if($r<0) $erro++;
+					$param = $this->createLoginAbonne($contrat);
+					//var_dump($param);exit;
+					//creation user par defaut
+					$fuser = new User($db);
+					require_once(DOL_DOCUMENT_ROOT.'/abonnement/class/html.formabonnement.class.php');
+					$login = isset($param['login'])?$param['login']:'';	
+					$password = isset($param['password'])?$param['password']:'';
+					$formabonne = new FormAbonnement($db);
+					$formabonne->envoiEmailFacture($facture,$login,$password);
+						
 				}else $erro++;
 
-			} else $erro++;
+			} else {
+				$erro++;
+			}
+			
 
 				
 		}
@@ -75,6 +117,40 @@ class Abonnement
 			$db->rollback();
 			return -1;
 		}
+	}
+	function createLoginAbonne($contrat) {
+		global $db;
+		$arrLoginParam = array();
+		//$contrat = new Contrat($db);
+		if(is_object($contrat)) {
+		//$db->begin();
+		$contrat->fetch_thirdparty();
+		$soc = $contrat->thirdparty;
+		
+		$contact = $soc->contact;
+		$arrContact = $soc->contact_array();
+		//var_dump($arrContact,'user');exit;
+		//var_dump($arrContact);
+		if(is_array($arrContact)&& count($arrContact)>0){
+			foreach ($arrContact as $contactid =>$label) {
+				$contact = new Contact($db);
+				$contact->fetch($contactid); 
+				$contrat->add_contact($contact->id, 'ABONWEB','external');
+				$nuser = new User($db);
+				$nuser->pass='passer';
+				$resultUser=$nuser->create_from_contact($contact,$contact->email,'passer');
+				//var_dump($resultUser);exit;
+				$arrLoginParam = array('login'=>$nuser->login,'password'=>$nuser->pass);
+				
+			}
+			
+		 
+		}
+		return $arrLoginParam;
+		//$db->rollback();
+		//exit;
+		}
+	
 	}
 	function createContratFromcommande1($command) {
 		global $user,$db;
@@ -271,9 +347,9 @@ class Abonnement
 
 
 			// get extrafields from original line
-			$object->lines[$i]->fetch_optionals($object->lines[$i]->rowid);
-			foreach($object->lines[$i]->array_options as $options_key => $value)
-				$line->array_options[$options_key] = $value;
+// 			$object->lines[$i]->fetch_optionals($object->lines[$i]->rowid);
+// 			foreach($object->lines[$i]->array_options as $options_key => $value)
+// 				$line->array_options[$options_key] = $value;
 
 			$facture->lines[$i] = $line;
 		}
@@ -296,8 +372,8 @@ class Abonnement
 
 		// get extrafields from original line
 		$object->fetch_optionals($object->id);
-		foreach($object->array_options as $options_key => $value)
-			$facture->array_options[$options_key] = $value;
+// 		foreach($object->array_options as $options_key => $value)
+// 			$facture->array_options[$options_key] = $value;
 
 		// Possibility to add external linked objects with hooks
 		$facture->linked_objects[$facture->origin] = $facture->origin_id;
@@ -365,8 +441,8 @@ class Abonnement
 			
 		// get extrafields from original line
 		$object->fetch_optionals($object->id);
-		foreach($object->array_options as $options_key => $value)
-			$contrat->array_options[$options_key] = $value;
+// 		foreach($object->array_options as $options_key => $value)
+// 			$contrat->array_options[$options_key] = $value;
 
 		// Possibility to add external linked objects with hooks
 		$contrat->linked_objects[$contrat->origin] = $contrat->origin_id;
