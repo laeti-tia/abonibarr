@@ -1092,7 +1092,7 @@ if ($step == 5 && $datatoimport)
 		
 		$error ='';
 		$errors = array();
-	
+		$nbreCommStructureSuccess =array();
 		// Loop on each input file record
 		while ($sourcelinenb < $nboflines && ! $endoffile)
 		{
@@ -1123,7 +1123,7 @@ if ($step == 5 && $datatoimport)
 				$refCmdComm = $resp['matches'][0];
 				$nbreCommStructure[] =array('devise'=>$devise,'montant'=>$montant,
 						'datepaiement'=>$datepaiement,'comm'=>$resp['matches'][0]);
-			     
+				
 				$i=0;
 				$abonne = new Abonnement($db);
 				$cmd = new Commande($db);
@@ -1136,7 +1136,8 @@ if ($step == 5 && $datatoimport)
 				//var_dump($refCmd);
 				if($re>0) {
 					$db->begin();
-				// $re = $cmd->valid($user);
+					
+				$re = $cmd->cloture($user);
 				
 				 $re = $abonne->createInvoiceAndContratFromCommande($cmd,abs($montant),'1',GETPOST('accountid'));
 				 //var_dump($re,'');exit;
@@ -1150,6 +1151,8 @@ if ($step == 5 && $datatoimport)
 				 //if (count($cmd->warnings)) $arrayofwarnings[$sourcelinenb]=$cmd->warnings;
 				 if (count($errors)<=0) {
 				 	$nbok++;
+				 	$nbreCommStructureSuccess[] =array('devise'=>$devise,'montant'=>$montant,
+				 			'datepaiement'=>$datepaiement,'comm'=>$resp['matches'][0],'orderRef'=>$cmd->ref);
 				 	$db->commit();
 				 }
 				 
@@ -1222,6 +1225,31 @@ if ($step == 5 && $datatoimport)
 	print $langs->trans("NbOfLinesImported",$nbok).'</b><br><br>';
 	print $langs->trans("Nombre de communication structurée").' : '.count($nbreCommStructure).'<br>';
 	//print $langs->trans("YouCanUseImportIdToFindRecord",$importid).'<br>';
+	if(count($nbreCommStructureSuccess) > 0) {
+	echo '<table>';
+	echo'<tr>';
+		echo'<td> Numéro Commande </td>';
+		echo'<td>Date</td>';
+		echo'<td>Devise</td>';
+		echo'<td>Communication structurée</td>';
+		echo'<td>Montant</td>';
+		echo'</tr>';
+		array('devise'=>$devise,'montant'=>$montant,
+				'datepaiement'=>$datepaiement,'comm'=>$resp['matches'][0]);
+		$totalSomme = 0;
+	foreach ($nbreCommStructureSuccess as $cmdSuccess) {
+		$totalSomme += $cmdSuccess['montant'];
+		echo'<tr>';
+		echo'<td>'.$cmdSuccess['orderRef'].'</td>';
+		echo'<td>'.$cmdSuccess['datepaiement'].'</td>';
+		echo'<td>'.$cmdSuccess['devise'].'</td>';
+		echo'<td>'.$cmdSuccess['comm'].'</td>';
+		echo'<td>'.$cmdSuccess['montant'].'</td>';
+		
+		echo'</tr>';
+		
+	}
+	}
 	print '</center>';
 }
 

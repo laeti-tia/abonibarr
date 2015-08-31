@@ -309,7 +309,7 @@ class FormAbonnement extends Form
 					$topic  = $outputlangs->trans('SendOrderRef', '__ORDERREF__ (__REFCLIENT__)');
 				}
 				// Get message template
-				$arraydefaultmessage=$this->getEMailTemplate($db, 'order_send', $fuser, $langs);
+				$arraydefaultmessage=$this->getEMailTemplate($db, 'abon_commande', $fuser, $langs);
 				$mesg =$arraydefaultmessage ['content'];
 				$substit ['__ORDERREF__'] = $object->ref;
 				$substit ['__SIGNATURE__'] = $fuser->signature;
