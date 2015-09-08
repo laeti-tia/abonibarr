@@ -116,7 +116,17 @@ class modAbonnement extends DolibarrModules
 						0,
 						'allentities',
 						1
-				));
+				),
+				1 => array(
+						'NBRE_MAX_ABONNE_WEB',
+						'chaine',
+						'',
+						'Nombre maximum d\'abonné web  ',
+						0,
+						'allentities',
+						1
+				)
+				);
 		$this->tabs = array('contract:+tabname1:Abonnement:abonnement@abonnement:1:/abonnement/contact.php?id=__ID__');  					// To add a new tab identified by code tabname1
 				                        //    'objecttype:+tabname2:SUBSTITUTION_Title2:mylangfile@abonnement:$user->rights->othermodule->read:/abonnement/mynewtab2.php?id=__ID__',  	// To add another new tab identified by code tabname2. Label will be result of calling all substitution functions on 'Title2' key.
 				                        //    'objecttype:-tabname:NU:conditiontoremove'

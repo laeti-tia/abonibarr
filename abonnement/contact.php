@@ -27,6 +27,7 @@ require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once (DOL_DOCUMENT_ROOT."/abonnement/class/html.formabonnement.class.php");
 
+require_once (DOL_DOCUMENT_ROOT."/abonnement/class/abonnement.class.php");
 
 $langs->load("contracts");
 $langs->load("companies");
@@ -53,71 +54,84 @@ if ($action == 'addabonne' && $user->rights->contrat->creer)
 {
 	$result = $object->fetch($id);
 
+
+
 	if ($result > 0 && $id > 0)
 	{
 		$db->begin();
-		$objContact = new Contact($db);
-		$objContact->socid			= $object->socid;
-		$objContact->lastname		= GETPOST("lastname");
-		$objContact->firstname		= GETPOST("firstname");
-		$objContact->civility_id	= GETPOST("civility_id",'alpha');
-		$objContact->poste			= GETPOST("poste");
-		$objContact->address		= GETPOST("address");
-		$objContact->zip			= GETPOST("zipcode");
-		$objContact->town			= GETPOST("town");
-		$objContact->country_id		= GETPOST("country_id",'int');
-		$objContact->state_id       = GETPOST("state_id",'int');
-		$objContact->skype			= GETPOST("skype");
-		$objContact->email			= GETPOST("email",'alpha');
-		$objContact->phone_pro		= GETPOST("phone_pro");
-		$objContact->phone_perso	= GETPOST("phone_perso");
-		$objContact->phone_mobile	= GETPOST("phone_mobile");
-		$objContact->fax			= GETPOST("fax");
-		$objContact->jabberid		= GETPOST("jabberid",'alpha');
-		$objContact->no_email		= GETPOST("no_email",'int');
-		$objContact->priv			= GETPOST("priv",'int');
-		$objContact->note_public	= GETPOST("note_public");
-		$objContact->note_private	= GETPOST("note_private");
-		$password = GETPOST("password");
-		$objContact->statut			= 1; //Defult status to Actif
-		$error=0;
-		$errors=array();
-		$contactid = (GETPOST('userid') ? GETPOST('userid') : GETPOST('contactid'));
-		$contactid =  $objContact->create($user);
+		$tabAb = $formAbonnement->getArrAbonneWeb($id);
+		//var_dump(count($tabAb));exit;
+		$nbreMaxAbonneWeb= intval($conf->global->NBRE_MAX_ABONNE_WEB)!=0?$conf->global->NBRE_MAX_ABONNE_WEB:10000;
+		//var_dump(($nbreMaxAbonneWeb));exit;
+		if(count($tabAb) < $nbreMaxAbonneWeb) {
+			$objContact = new Contact($db);
+			$objContact->socid			= $object->socid;
+			$objContact->lastname		= GETPOST("lastname");
+			$objContact->firstname		= GETPOST("firstname");
+			$objContact->civility_id	= GETPOST("civility_id",'alpha');
+			$objContact->poste			= GETPOST("poste");
+			$objContact->address		= GETPOST("address");
+			$objContact->zip			= GETPOST("zipcode");
+			$objContact->town			= GETPOST("town");
+			$objContact->country_id		= GETPOST("country_id",'int');
+			$objContact->state_id       = GETPOST("state_id",'int');
+			$objContact->skype			= GETPOST("skype");
+			$objContact->email			= GETPOST("email",'alpha');
+			$objContact->phone_pro		= GETPOST("phone_pro");
+			$objContact->phone_perso	= GETPOST("phone_perso");
+			$objContact->phone_mobile	= GETPOST("phone_mobile");
+			$objContact->fax			= GETPOST("fax");
+			$objContact->jabberid		= GETPOST("jabberid",'alpha');
+			$objContact->no_email		= GETPOST("no_email",'int');
+			$objContact->priv			= GETPOST("priv",'int');
+			$objContact->note_public	= GETPOST("note_public");
+			$objContact->note_private	= GETPOST("note_private");
+			$password = GETPOST("password");
+			$objContact->statut			= 1; //Defult status to Actif
+			$error=0;
+			$errors=array();
+			$contactid = (GETPOST('userid') ? GETPOST('userid') : GETPOST('contactid'));
+			$contactid =  $objContact->create($user);
 
-		if ($contactid <= 0)
-		{
-			$error++; $errors=array_merge($errors,($objContact->error?array($objContact->error):$objContact->errors));
-			$action = 'create';
-		}
-		
-		$result = $object->add_contact($contactid, $_POST["type_contact"], 'external');
-		if ($result < 0)
-		{
-			if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
-				$langs->load("errors");
-				$msg = $langs->trans("ErrorThisContactIsAlreadyDefinedAsThisType");
-			} else {
-				$mesg = $object->error;
+			if ($contactid > 0)
+			{
+				$result = $object->add_contact($contactid, $_POST["type_contact"], 'external');
+				if($result > 0) {
+					$nuser = new User($db);
+					$resultUser=$nuser->create_from_contact($objContact,$objContact->email,$password);
+
+					if ($resultUser < 0)
+					{
+						$langs->load("errors");
+						//$error++; $errors=array_merge($errors,array($langs->trans($nuser->error)));
+						//$action = 'create';
+						setEventMessage($langs->trans($nuser->error), 'errors');
+					}
+					$formAbonnement->envoiEmailUser($nuser,$password);
+
+				} else {
+					if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+						$langs->load("errors");
+						$msg = $langs->trans("ErrorThisContactIsAlreadyDefinedAsThisType");
+					} else {
+						$mesg = $object->error;
+					}
+					$error++; $errors=array_merge($errors,array($mesg));
+					$action = 'create';
+				}
+
+			} else
+
+			{
+				$error++; $errors=array_merge($errors,($objContact->error?array($objContact->error):$objContact->errors));
+				$action = 'create';
 			}
+		} else {
+			$mesg="Le nombre maximum d'abonné web est de $nbreMaxAbonneWeb, vous ne pouvez plus ajouter d'autre compte";
 			$error++; $errors=array_merge($errors,array($mesg));
 			$action = 'create';
-// 			$db->rollback();
-
-// 			setEventMessage($mesg, 'errors');
 		}
-		 $nuser = new User($db);
-		$resultUser=$nuser->create_from_contact($objContact,$objContact->email,$password);
 
-		if ($resultUser < 0)
-		{
-			$langs->load("errors");
-			//$error++; $errors=array_merge($errors,array($langs->trans($nuser->error)));
-			//$action = 'create';
-			setEventMessage($langs->trans($nuser->error), 'errors');
-		} 
-		//$nuser->send_password($user, $password);
-		$formAbonnement->envoiEmailUser($nuser,$password);
 	}
 
 	if (!$error )

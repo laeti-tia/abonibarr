@@ -56,6 +56,10 @@ $scandir = GETPOST('scandir', 'alpha');
 	if (! empty($nb_renouvel)) {
 		$res = dolibarr_set_const($db, 'NBRE_JOURS_AVANT_RENOUVELLEMENT', $nb_renouvel, 'chaine', 0, '', $conf->entity);
 	}
+	$nb_max_abonne = GETPOST('NBRE_MAX_ABONNE_WEB', 'int');
+	if (! empty($nb_max_abonne)) {
+		$res = dolibarr_set_const($db, 'NBRE_MAX_ABONNE_WEB', $nb_max_abonne, 'chaine', 0, '', $conf->entity);
+	}
 	if (! $res > 0)
 		$error ++;
 	
@@ -107,16 +111,15 @@ print '<td align="left">';
 print '<input type="text" name="NBRE_JOURS_AVANT_RENOUVELLEMENT" value="' . $conf->global->NBRE_JOURS_AVANT_RENOUVELLEMENT . '" size="4" ></td>';
 print '</tr>';
 
-// User Group
-//print '<tr class="pair"><td>' . $langs->trans("LeadUserGroupAffect") . '</td>';
-//print '<td align="left">';
-//print $form->select_dolgroups($conf->global->LEAD_GRP_USER_AFFECT, 'LEAD_GRP_USER_AFFECT', 1, array(), 0, '', '', $object->entity);
-/*$form->select_
-*/
-//print '</tr>';
+// Nbre maxi d'abonné
+print '<tr class="impair"><td>' . $langs->trans("NBRE_MAX_ABONNE_WEB") . '</td>';
+print '<td align="left">';
+print '<input type="text" name="NBRE_MAX_ABONNE_WEB" value="' . $conf->global->NBRE_MAX_ABONNE_WEB . '" size="4" ></td>';
+print '</tr>';
+
 print '</table>';
 
-print '<tr class="impair"><td colspan="2" align="right"><input type="submit" class="button" value="' . $langs->trans("Save") . '"></td>';
+print '<tr class="pair"><td colspan="2" align="right"><input type="submit" class="button" value="' . $langs->trans("Save") . '"></td>';
 print '</tr>';
 
 print '</table><br>';

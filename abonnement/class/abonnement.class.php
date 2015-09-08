@@ -494,4 +494,6 @@ class Abonnement
 		if(!$erro) return $contrat;
 		else return -1;
 	}
+	
+	
 }

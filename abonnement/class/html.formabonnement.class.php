@@ -67,6 +67,65 @@ class FormAbonnement extends Form
 		}
 		return $out;
 	}
+	function getArrAbonneWeb($id_contrat)
+	{
+		global $langs;
+	
+		$tab=array();
+	
+		$sql = "SELECT ec.rowid, ec.statut, ec.fk_socpeople as id, ec.fk_c_type_contact";    // This field contains id of llx_socpeople or id of llx_user
+		$sql.=", t.fk_soc as socid";
+		$sql.= ", t.civility as civility, t.lastname as lastname, t.firstname, t.email";
+		$sql.= ", tc.source, tc.element, tc.code, tc.libelle";
+		$sql.= " FROM ".MAIN_DB_PREFIX."c_type_contact tc";
+		$sql.= ", ".MAIN_DB_PREFIX."element_contact ec";
+		$sql.=" LEFT JOIN ".MAIN_DB_PREFIX."socpeople t on ec.fk_socpeople = t.rowid";
+		$sql.= " WHERE ec.element_id =".$id_contrat;
+		$sql.= " AND ec.fk_c_type_contact=tc.rowid";
+		$sql.= " AND tc.element='contrat'";
+		$sql.= " AND tc.source = 'external'";
+		//$sql.= " AND tc.code = 'ABONWEB'";
+		$sql.= " AND ec.fk_c_type_contact = '6000022'";
+		$sql.= " AND tc.active=1";
+		//if ($statut >= 0) $sql.= " AND ec.statut = '".$statut."'";
+		$sql.=" ORDER BY t.lastname ASC";
+	
+		dol_syslog(get_class($this)."::liste_contact", LOG_DEBUG);
+		$resql=$this->db->query($sql);
+		if ($resql)
+		{
+			$num=$this->db->num_rows($resql);
+			$i=0;
+			while ($i < $num)
+			{
+				$obj = $this->db->fetch_object($resql);
+	
+				if (! $list)
+				{
+					$transkey="TypeContact_".$obj->element."_".$obj->source."_".$obj->code;
+					$libelle_type=($langs->trans($transkey)!=$transkey ? $langs->trans($transkey) : $obj->libelle);
+					$tab[$i]=array('source'=>$obj->source,'socid'=>$obj->socid,'id'=>$obj->id,
+							'nom'=>$obj->lastname,      // For backward compatibility
+							'civility'=>$obj->civility, 'lastname'=>$obj->lastname, 'firstname'=>$obj->firstname, 'email'=>$obj->email,
+							'rowid'=>$obj->rowid,'code'=>$obj->code,'libelle'=>$libelle_type,'status'=>$obj->statut, 'fk_c_type_contact' => $obj->fk_c_type_contact);
+				}
+				else
+				{
+					$tab[$i]=$obj->id;
+				}
+	
+				$i++;
+			}
+	
+			return $tab;
+		}
+		else
+		{
+			$this->error=$this->db->error();
+			dol_print_error($this->db);
+			return -1;
+		}
+	}
 	function type_contact_abonnement( $activeonly=0, $code='')
 	{
 		global $langs,$db;
