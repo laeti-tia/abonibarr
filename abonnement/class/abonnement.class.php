@@ -20,15 +20,15 @@ class Abonnement
 		global $db;
 		$extrafields=new ExtraFields($db);
 		require_once (DOL_DOCUMENT_ROOT."/abonnement/class/communication_structure.class.php");
-			$extralabels=$extrafields->fetch_name_optionals_label('commande',true);
+		$extralabels=$extrafields->fetch_name_optionals_label('commande',true);
 		//
 		$arrData['options_comm_structure']=CommStructure::generate($objet->ref);
 		//var_dump(CommStructure::genera  te($objet->ref));exit;
 		$result = 1; $objet->array_options['options_comm_structure']=CommStructure::generate($objet->ref);
 		$objet->insertExtraFields();
-		
+
 		$objet->fetch_optionals($objet->id);
-		
+
 		return CommStructure::generate($objet->ref);
 	}
 	function updateExtrafieldsCommande($objet,$arrData) {
@@ -52,7 +52,7 @@ class Abonnement
 		global $db,$user;
 		//$facture = new Facture($db);
 		$paiement = new Paiement($db);
-		
+
 		$paiement->datepaye     = dol_now();
 		$paiement->amounts      = array($facture->id=>$montantPaie);   // Array with all payments dispatching
 		$paiement->paiementid   = dol_getIdFromCode($db,'VIR','c_paiement');
@@ -67,9 +67,9 @@ class Abonnement
 		$tiers = new Societe($db);
 		$tiers->fetch($facture->socid);
 		$result=$paiement->addPaymentToBank($user,'payment',$label,$id_accound,$tiers->nom,$numCh);
-		
+
 		if(!$result) $this->errors = $paiement->errors;
-		
+
 		return $result ;
 	}
 
@@ -80,14 +80,16 @@ class Abonnement
 		$facture = new Facture($db);
 		// = new Contrat($db);
 		if(is_object($object)){
-				
+
 			$object->valid($user);
-			$cn = new commande($db); 
+			$cn = new commande($db);
 			$contrat = $this->createContratFromCommande($object);
+				
 			if (is_object($contrat) )
 			{
 				$contrat->validate($user);
-				//$this->activeServiceContrat($contrat);
+				$t=$this->activeServiceContrat($contrat);
+
 				$facture = $this->createInvoiceFromContrat($contrat);
 				if (is_object($facture) ) {
 					$facture->validate($user);
@@ -99,19 +101,19 @@ class Abonnement
 					//creation user par defaut
 					$fuser = new User($db);
 					require_once(DOL_DOCUMENT_ROOT.'/abonnement/class/html.formabonnement.class.php');
-					$login = isset($param['login'])?$param['login']:'';	
+					$login = isset($param['login'])?$param['login']:'';
 					$password = isset($param['password'])?$param['password']:'';
 					$formabonne = new FormAbonnement($db);
 					$formabonne->envoiEmailFacture($facture,$login,$password);
-						
+
 				}else $erro++;
 
 			} else {
 				$erro++;
 			}
-			
-
 				
+
+
 		}
 		if (!$erro) {
 			$db->commit();
@@ -126,34 +128,34 @@ class Abonnement
 		$arrLoginParam = array();
 		//$contrat = new Contrat($db);
 		if(is_object($contrat)) {
-		//$db->begin();
-		$contrat->fetch_thirdparty();
-		$soc = $contrat->thirdparty;
-		
-		$contact = $soc->contact;
-		$arrContact = $soc->contact_array();
-		//var_dump($arrContact,'user');exit;
-		//var_dump($arrContact);
-		if(is_array($arrContact)&& count($arrContact)>0){
-			foreach ($arrContact as $contactid =>$label) {
-				$contact = new Contact($db);
-				$contact->fetch($contactid); 
-				$contrat->add_contact($contact->id, 'ABONWEB','external');
-				$nuser = new User($db);
-				$nuser->pass='passer';
-				$resultUser=$nuser->create_from_contact($contact,$contact->email,'passer');
-				//var_dump($resultUser);exit;
-				$arrLoginParam = array('login'=>$nuser->login,'password'=>$nuser->pass);
-				
+			//$db->begin();
+			$contrat->fetch_thirdparty();
+			$soc = $contrat->thirdparty;
+
+			$contact = $soc->contact;
+			$arrContact = $soc->contact_array();
+			//var_dump($arrContact,'user');exit;
+			//var_dump($arrContact);
+			if(is_array($arrContact)&& count($arrContact)>0){
+				foreach ($arrContact as $contactid =>$label) {
+					$contact = new Contact($db);
+					$contact->fetch($contactid);
+					$contrat->add_contact($contact->id, 'ABONWEB','external');
+					$nuser = new User($db);
+					$nuser->pass='passer';
+					$resultUser=$nuser->create_from_contact($contact,$contact->email,'passer');
+					//var_dump($resultUser);exit;
+					$arrLoginParam = array('login'=>$nuser->login,'password'=>$nuser->pass);
+
+				}
+					
+					
 			}
-			
-		 
+			return $arrLoginParam;
+			//$db->rollback();
+			//exit;
 		}
-		return $arrLoginParam;
-		//$db->rollback();
-		//exit;
-		}
-	
+
 	}
 	function createContratFromcommande1($command) {
 		global $user,$db;
@@ -187,7 +189,7 @@ class Abonnement
 			}
 			for ($i=0;$i<$num;$i++)
 			{
-				var_dump($lines[$i]->product_type);exit;
+				//var_dump($lines[$i]->product_type);exit;
 				$product_type=($lines[$i]->product_type?$lines[$i]->product_type:0);
 
 				if ($product_type == 1 || (! empty($conf->global->CONTRACT_SUPPORT_PRODUCTS) && in_array($product_type, array(0,1)))) { 	// TODO Exclude also deee
@@ -284,19 +286,22 @@ class Abonnement
 	}
 	function activeServiceContrat($contrat) {
 		global $user;
+
 		if(!is_object($contrat)) {
 			return -1;
 		}
-		
+
 		$contrat->fetch_lines();
 		$num=count($contrat->lines);
-		for ($i = 0; $i < $num; $i++)
-		{ 
-			$contrat->active_line($user,$contrat->lines[$i]->rowid, $contrat->lines[$i]->date_start,
-					$contrat->lines[$i]->date_end);
-				
 
+		for ($i = 0; $i < $num; $i++)
+		{
+			$contrat->active_line($user,$contrat->lines[$i]->id, $contrat->lines[$i]->date_start,
+					$contrat->lines[$i]->date_fin_validite);
+
+				
 		}
+
 		return 1;
 
 	}
@@ -350,9 +355,9 @@ class Abonnement
 
 
 			// get extrafields from original line
-// 			$object->lines[$i]->fetch_optionals($object->lines[$i]->rowid);
-// 			foreach($object->lines[$i]->array_options as $options_key => $value)
-// 				$line->array_options[$options_key] = $value;
+			// 			$object->lines[$i]->fetch_optionals($object->lines[$i]->rowid);
+			// 			foreach($object->lines[$i]->array_options as $options_key => $value)
+				// 				$line->array_options[$options_key] = $value;
 
 			$facture->lines[$i] = $line;
 		}
@@ -375,8 +380,8 @@ class Abonnement
 
 		// get extrafields from original line
 		$object->fetch_optionals($object->id);
-// 		foreach($object->array_options as $options_key => $value)
-// 			$facture->array_options[$options_key] = $value;
+		// 		foreach($object->array_options as $options_key => $value)
+			// 			$facture->array_options[$options_key] = $value;
 
 		// Possibility to add external linked objects with hooks
 		$facture->linked_objects[$facture->origin] = $facture->origin_id;
@@ -444,8 +449,8 @@ class Abonnement
 			
 		// get extrafields from original line
 		$object->fetch_optionals($object->id);
-// 		foreach($object->array_options as $options_key => $value)
-// 			$contrat->array_options[$options_key] = $value;
+		// 		foreach($object->array_options as $options_key => $value)
+			// 			$contrat->array_options[$options_key] = $value;
 
 		// Possibility to add external linked objects with hooks
 		$contrat->linked_objects[$contrat->origin] = $contrat->origin_id;
@@ -494,6 +499,73 @@ class Abonnement
 		if(!$erro) return $contrat;
 		else return -1;
 	}
-	
-	
+
+	function contrat_expire($duration_value,$duration_value2){
+		$sql = "SELECT DISTINCT tc.rowid, tc.code, tc.libelle";
+		$sql.= " FROM ".MAIN_DB_PREFIX."c_type_contact as tc";
+		$sql.= " WHERE tc.element='contrat'";
+		$sql.= " AND tc.source='external'";
+		$sql.= " AND tc.code like'ABON%'";
+		var_dump($sql);
+
+		$sql  = "SELECT c.ref, cd.date_fin_validite, cd.total_ttc, cd.description as description, p.label as plabel,";
+		$sql.= " s.rowid as sid, s.nom as name, s.email, s.default_lang";
+		$sql.= ", sp.rowid as cid, sp.firstname as cfirstname, sp.lastname as clastname, sp.email as cemail";
+		$sql .= " FROM ".MAIN_DB_PREFIX."societe AS s";
+		$sql.= ", ".MAIN_DB_PREFIX."socpeople as sp";
+		$sql .= ", ".MAIN_DB_PREFIX."contrat AS c";
+		$sql .= ", ".MAIN_DB_PREFIX."contratdet AS cd";
+		$sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product AS p ON p.rowid = cd.fk_product";
+		$sql .= " WHERE s.rowid = c.fk_soc AND c.rowid = cd.fk_contrat AND c.statut > 0 AND cd.statut < 5";
+		if (is_numeric($duration_value2)) $sql.= " AND cd.date_fin_validite >= '".$db->idate(dol_time_plus_duree($now, $duration_value2, "d"))."'";
+		if (is_numeric($duration_value)) $sql.= " AND cd.date_fin_validite < '".$db->idate(dol_time_plus_duree($now, $duration_value, "d"))."'";
+		$sql.= " AND s.rowid = sp.fk_soc";
+		$sql.= " ORDER BY";
+		$sql.= " sp.email, sp.rowid,";
+		$sql.= " s.email ASC, s.rowid ASC, cd.date_fin_validite ASC";	// Order by email to allow one message per email
+
+		var_dump($sql);exit;
+	}
+	public function getContratActive($login) {
+		global $db;
+		$sql = "SELECT ec.rowid FROM
+		".MAIN_DB_PREFIX."c_type_contact tc,
+		".MAIN_DB_PREFIX."element_contact ec ,
+		".MAIN_DB_PREFIX."socpeople t   ,
+		".MAIN_DB_PREFIX."user u ,
+		".MAIN_DB_PREFIX."contrat AS c,
+		".MAIN_DB_PREFIX."contratdet AS cd LEFT JOIN ".MAIN_DB_PREFIX."product AS p ON p.rowid = cd.fk_product
+		WHERE  ec.element_id= c.rowid AND c.rowid = cd.fk_contrat AND ec.fk_socpeople = t.rowid AND  u.fk_socpeople=t.rowid
+		AND  ec.fk_c_type_contact=tc.rowid AND tc.element='contrat'
+		AND tc.source = 'external' AND ec.fk_c_type_contact = '6000022'
+		AND tc.active=1 AND u.login = '$login'
+		AND 	cd.statut = 4
+		ORDER BY c.rowid, t.lastname ASC ";
+		$elements = array();
+		$result=$db->query($sql);
+		if ($result)
+		{
+			$nump = $this->db->num_rows($result);
+			if ($nump)
+			{
+				$i = 0;
+				while ($i < $nump)
+				{
+					$obj = $this->db->fetch_object($result);
+					$elements[$i] = $obj->rowid;
+					$i++;
+				}
+				$this->db->free($result);
+				/* Return array */
+				return $elements;
+			}
+		}
+		else
+		{
+			dol_print_error($this->db);
+		}
+		return $elements;
+
+	}
+
 }

@@ -1140,7 +1140,7 @@ if ($step == 5 && $datatoimport)
 				$re = $cmd->cloture($user);
 				
 				 $re = $abonne->createInvoiceAndContratFromCommande($cmd,abs($montant),'1',GETPOST('accountid'));
-				 //var_dump($re,'');exit;
+				// var_dump($re,'');exit;
 				 if(!$re) {
 				 	$errors[] =$abonne->errors;
 				 }	

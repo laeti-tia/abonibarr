@@ -119,7 +119,15 @@ $thirdparty_fields= array(
     	'profid6' => array('name'=>'profid6','type'=>'xsd:string'),
         'capital' => array('name'=>'capital','type'=>'xsd:string'),
     	'vat_used' => array('name'=>'vat_used','type'=>'xsd:string'),
-    	'vat_number' => array('name'=>'vat_number','type'=>'xsd:string'));
+    	'vat_number' => array('name'=>'vat_number','type'=>'xsd:string'),
+		'livr_adress' => array('name'=>'livr_adress','type'=>'xsd:string'),
+		'livr_zip' => array('name'=>'livr_zip','type'=>'xsd:string'),
+		'livr_town' => array('name'=>'livr_town','type'=>'xsd:string'),
+		'livr_country' => array('name'=>'livr_country','type'=>'xsd:string'),
+		'contactname' => array('name'=>'contactname','type'=>'xsd:string'),
+		'contactfirstname' => array('name'=>'contactfirstname','type'=>'xsd:string'),
+		
+		);
 
 //Retreive all extrafield for thirdsparty
 // fetch optionals attributes and labels
@@ -467,6 +475,25 @@ function createThirdParty($authentication,$thirdparty,$idCmd=null)
         {
             $error++;
         }
+        
+       // if($thirdparty['firstname']!=$thirdparty['contactfirstname'] && $thirdparty['lastname']!=$thirdparty['contactname'])
+        if($thirdparty['address']!=$thirdparty['livr_adress'] ) {
+        	$contact = new Contact($db);
+        	$contact->lastname = $thirdparty['contactname'];
+        	$contact->firstname = $thirdparty['contactfirstname'];
+        	$contact->socid = $newobject->id;
+        	$contact->address = $thirdparty['livr_adress'];
+        	$contact->zip = $thirdparty['livr_zip'];
+        	$contact->town = $thirdparty['livr_town'];
+        	$contact->country_id = $thirdparty['livr_country'];
+        	$result= $contact->create($fuser);
+        	if ($result <= 0)
+        	{
+        		$error++;
+        	}
+        }
+        
+        
         $erCommande = '';
         if(!is_null($idCmd)) {
         require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';

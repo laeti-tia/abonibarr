@@ -89,7 +89,7 @@ class FormAbonnement extends Form
 		$sql.= " AND tc.active=1";
 		//if ($statut >= 0) $sql.= " AND ec.statut = '".$statut."'";
 		$sql.=" ORDER BY t.lastname ASC";
-	
+	var_dump($sql);
 		dol_syslog(get_class($this)."::liste_contact", LOG_DEBUG);
 		$resql=$this->db->query($sql);
 		if ($resql)

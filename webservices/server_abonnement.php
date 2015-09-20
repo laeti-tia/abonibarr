@@ -35,6 +35,8 @@ require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once(DOL_DOCUMENT_ROOT."/categories/class/categorie.class.php");
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+require_once DOL_DOCUMENT_ROOT.'/abonnement/class/abonnement.class.php';
 
 
 
@@ -1191,8 +1193,9 @@ function getUser($authentication)
 	$error=0;
 	$fuser=check_authentication($authentication,$error,$errorcode,$errorlabel);
 
-
-	if (! $error)
+    $abon = new Abonnement($db);
+    $arrcontrat_active = $abon->getContratActive($authentication['login']);
+	if (! $error && count($arrcontrat_active)>0)
 	{
 		// Create
 		$user = $fuser;
@@ -1230,6 +1233,10 @@ function getUser($authentication)
 
 
 
+	} 
+	if(count($arrcontrat_active) <=0 ) {
+		$error ++;
+         $errorcode='ERROR_CONTRAT_USER'; $errorlabel="Votre abonnement n'est pas encore activé, veuillez contacter alter";
 	}
 
 	if ($error)

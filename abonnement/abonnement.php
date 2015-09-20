@@ -36,6 +36,12 @@ $action = GETPOST('action', 'alpha');
 
 $formabonne = new FormAbonnement($db);
 $abonne = new Abonnement($db);
+//$formabonne->getArrAbonneWeb(112);exit;
+$login = 'ares.voukissi@gmail.com';
+$login = 'code1.code1';
+$r=$abonne->getContratActive($login);
+var_dump($r);exit;
+//$abonne->contrat_expire($duration_value, $duration_value2);
 
 //  $cmd = new Commande($db);
 //  $cmd->fetch(88);
