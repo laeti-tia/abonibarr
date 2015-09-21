@@ -185,6 +185,11 @@ class modAbonnement extends DolibarrModules
         // Boxes
 		// Add here list of php file(s) stored in core/boxes that contains class to show a box.
         $this->boxes = array();			// List of boxes
+		$r = 0;
+			
+		$this->boxes[$r][1] = "box_abon_trop_percu.php@abonnement";
+		//$r ++;
+		//$this->boxes[$r][1] = "box_abon_late@abonnement";
 		// Example:
 		//$this->boxes=array(array(0=>array('file'=>'myboxa.php','note'=>'','enabledbydefaulton'=>'Home'),1=>array('file'=>'myboxb.php','note'=>''),2=>array('file'=>'myboxc.php','note'=>'')););
 

@@ -36,6 +36,7 @@ AbonnementAUT = Abonnement Automatique
 NBAbonnement = Nombre de relance
 NBRE_JOURS_AVANT_RENOUVELLEMENT = Nombre de jours avant le renouvellement de l'abonnement
 NBRE_MAX_ABONNE_WEB = Nombre maximum d'abonné web
+ABONListTropPercu = Facture trop perçu
 #
 # Page À propos
 #
