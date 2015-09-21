@@ -347,6 +347,18 @@ $server->register(
 		$styleuse,
 		'WS to get list of all products or services id and ref'
 );
+$server->register(
+		'getListOfProductsOrServicesForCategory',
+		// Entry values
+		array('authentication'=>'tns:authentication','id'=>'xsd:string','filterproduct'=>'tns:filterproduct'),
+		// Exit values
+		array('result'=>'tns:result','products'=>'tns:ProductsArray2'),
+		$ns,
+		$ns.'#getListOfProductsOrServicesForCategory',
+		$styledoc,
+		$styleuse,
+		'WS to get list of all products or services id and ref'
+);
 
 $server->register(
 		'getListOfCountry',
@@ -917,6 +929,86 @@ function getListOfProductsOrServices($authentication,$filterproduct)
 			if ($key == 'type' && $val >= 0)   	$sql.=" AND fk_product_type = ".$db->escape($val);
 			if ($key == 'tosell') 				$sql.=" AND to_sell = ".$db->escape($val);
 			if ($key == 'tobuy')  				$sql.=" AND to_buy = ".$db->escape($val);
+		}
+		$resql=$db->query($sql);
+		if ($resql)
+		{
+			$num=$db->num_rows($resql);
+
+			$i=0;
+			while ($i < $num)
+			{
+				$obj=$db->fetch_object($resql);
+				$arrayproducts[]=array('id'=>$obj->rowid,'ref'=>$obj->ref,'ref_ext'=>$obj->ref_ext,'label'=>$obj->label);
+				$i++;
+			}
+		}
+		else
+		{
+			$error++;
+			$errorcode=$db->lasterrno();
+			$errorlabel=$db->lasterror();
+		}
+	}
+
+	if ($error)
+	{
+		$objectresp = array(
+				'result'=>array('result_code' => $errorcode, 'result_label' => $errorlabel),
+				'products'=>$arrayproducts
+		);
+	}
+	else
+	{
+		$objectresp = array(
+				'result'=>array('result_code' => 'OK', 'result_label' => ''),
+				'products'=>$arrayproducts
+		);
+	}
+
+	return $objectresp;
+}
+
+/**
+ * getListOfProductsOrServicesForCategory
+ *
+ * @param	array		$authentication		Array of authentication information
+ * @param	array		$filterproduct		Filter fields
+ * @return	array							Array result
+ */
+function getListOfProductsOrServicesForCategory($authentication,$id,$filterproduct)
+{
+	global $db,$conf,$langs;
+
+	$now=dol_now();
+
+	dol_syslog("Function: getListOfProductsOrServicesForCategory login=".$authentication['login']);
+
+	if ($authentication['entity']) $conf->entity=$authentication['entity'];
+
+	// Init and check authentication
+	$objectresp=array();
+	$arrayproducts=array();
+	$errorcode='';$errorlabel='';
+	$error=0;
+	$fuser=check_authentication($authentication,$error,$errorcode,$errorlabel);
+	// Check parameters
+
+	if (! $error)
+	{
+		$sql ="SELECT p.rowid, p.ref, p.ref_ext,p.label";
+		$sql.=" FROM ".MAIN_DB_PREFIX."product as p,";
+		$sql.="  ".MAIN_DB_PREFIX."categorie_product as cp,";
+		$sql.="  ".MAIN_DB_PREFIX."categorie as c";
+		$sql.=" WHERE cp.`fk_categorie`= c.rowid AND cp.`fk_product` = p.rowid ";
+		$sql.=" AND p.entity=".$conf->entity;
+		$sql.=" AND c.label='".$db->escape($id)."' ";
+		
+		foreach($filterproduct as $key => $val)
+		{
+			if ($key == 'type' && $val >= 0)   	$sql.=" AND p.fk_product_type = ".$db->escape($val);
+			if ($key == 'tosell') 				$sql.=" AND p.tosell = ".$db->escape($val);
+			if ($key == 'tobuy')  				$sql.=" AND p.tobuy = ".$db->escape($val);
 		}
 		$resql=$db->query($sql);
 		if ($resql)
