@@ -9,6 +9,7 @@ class ContratPDFMasse {
 	public $message = "";
 	public $sendtocc = "";
 	function substitutionarray($contrat ) {
+		$contratdt = $contrat->lines[0];
 	 return 	$substitutionarray=array(
 				'__ID__' => $contrat->id,
 				'__EMAIL__' => $contrat->thirdparty->email,
@@ -18,6 +19,7 @@ class ContratPDFMasse {
 				'__REF__' => $contrat->ref,
 				'__REFCLIENT__' => $contrat->thirdparty->name,
 				'__FACREF__'=>$contrat->ref,
+	 		    '__DATE_FIN_VALIDER'=>is_object($contratdt)?$contratdt->date_fin_validite:''
 		);
 	}
 	function generePDF($dataSend,$message,$subject,$sendtocc ,$db) {
@@ -49,14 +51,15 @@ class ContratPDFMasse {
 					// TODO Use future field $object->fullpathdoc to know where is stored default file
 					// TODO If not defined, use $object->modelpdf (or defaut invoice config) to know what is template to use to regenerate doc.
 					$filename=dol_sanitizeFileName($object->ref).'.pdf';
-					$filedir=$conf->facture->dir_output . '/' . dol_sanitizeFileName($object->ref);
+					$filedir=$conf->commande->dir_output . '/' . dol_sanitizeFileName($object->ref);
 					$file = $filedir . '/' . $filename;
 					$mime = 'application/pdf';
-					//
+					//var_dump(dol_is_file($file));exit;
 					if (dol_is_file($file))
 					{
 						$object->fetch_thirdparty();
 						$sendto = $object->thirdparty->email;
+						//var_dump($sendto);exit;
 						if (empty($sendto)) $this->nbignored++;
 							
 						if (dol_strlen($sendto))

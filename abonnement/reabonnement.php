@@ -65,7 +65,14 @@ $op2month=GETPOST('op2month');
 $op2day=GETPOST('op2day');
 $op2year=GETPOST('op2year');
 $filter_op2=GETPOST('filter_op2');
+//
+// $issearch = false;
+// if($filter <>'' || $search_name<>'' || $search_contract<>'' ||$search_service<>'' ||
+// $statut<>'' ||$socid<>'' || $op1month<>'' ||$op1day<>'' ||$op1year<>'' ||$filter_op1<>'' ||
+// $op2month<>'' ||$op2day<>'' ||$op2year<>'' ||$filter_op2<>'' )
+// 	$issearch = true;
 
+// var_dump($issearch);
 // Security check
 $contratid = GETPOST('id','int');
 if (! empty($user->societe_id)) $socid=$user->societe_id;
@@ -89,11 +96,13 @@ if (GETPOST("button_removefilter_x") || GETPOST("button_removefilter")) // Both 
 	$op2day="";
 	$op2year="";
 	$filter_op2="";
+	
 }
+//var_dump($_REQUEST);exit;
 if ($action == 'confirmesendmail' && GETPOST('cancel'))
 {
 	$action = '';
-}elseif($action == 'confirmesendmail') {
+}elseif($action == 'confirmesendmail' ) {
 	if (!isset($user->email))
 	{
 		$error++;
@@ -166,23 +175,26 @@ $sql.= " cd.date_ouverture,";
 $sql.= " cd.date_fin_validite,";
 $sql.= " cd.date_cloture,";
 $sql.= " DATEDIFF( cd.date_fin_validite,now()) as nbre_jours_renouveau";
-$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
-$sql.= " ".MAIN_DB_PREFIX."societe as s,";
-if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
-$sql.= " ".MAIN_DB_PREFIX."contratdet as cd";
+$sql.= " FROM ".MAIN_DB_PREFIX."contrat as c ";
+$sql.= " LEFT JOIN  ".MAIN_DB_PREFIX."societe as s ON  c.fk_soc = s.rowid ";
+//if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON  c.rowid = cd.fk_contrat ";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON cd.fk_product = p.rowid";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.fk_object ";
+
 $sql.= " WHERE c.entity = ".$conf->entity;
-$sql.= " AND c.rowid = cd.fk_contrat";
-$sql.= " AND c.fk_soc = s.rowid";
+$sql.= " AND (ce.prop_renouv=0 OR ce.prop_renouv is null) ";
+$sql.= " ";
+
 if( $conf->global->NBRE_JOURS_AVANT_RENOUVELLEMENT) $sql.=" AND DATEDIFF( date_fin_validite,now()) <= ". $conf->global->NBRE_JOURS_AVANT_RENOUVELLEMENT;
 
-if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
-if ($mode == "0") $sql.= " AND cd.statut = 0";
-if ($mode == "4") $sql.= " AND cd.statut = 4";
-if ($mode == "5") $sql.= " AND cd.statut = 5";
+//if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
+//if ($mode == "0") $sql.= " AND cd.statut = 0";
+//if ($mode == "4") $sql.= " AND cd.statut = 4";
+//if ($mode == "5") $sql.= " AND cd.statut = 5";
 if ($filter == "expired") $sql.= " AND cd.date_fin_validite < '".$db->idate($now)."'";
 if ($search_name)     $sql.= " AND s.nom LIKE '%".$db->escape($search_name)."%'";
-if ($search_contract) $sql.= " AND c.rowid = '".$db->escape($search_contract)."'";
+if ($search_contract) $sql.= " AND c.ref = '".$db->escape($search_contract)."'";
 if ($search_service)  $sql.= " AND (p.ref LIKE '%".$db->escape($search_service)."%' OR p.description LIKE '%".$db->escape($search_service)."%' OR cd.description LIKE '%".$db->escape($search_service)."%')";
 if ($socid > 0)       $sql.= " AND s.rowid = ".$socid;
 $filter_date1=dol_mktime(0,0,0,$op1month,$op1day,$op1year);
@@ -192,13 +204,12 @@ if (! empty($filter_op2) && $filter_op2 != -1 && $filter_date2 != '') $sql.= " A
 $sql .= $db->order($sortfield,$sortorder);
 $sql .= $db->plimit($limit + 1, $offset);
 
-
+var_dump($_REQUEST);exit;
 dol_syslog("contrat/services.php", LOG_DEBUG);
 
 print '<form method="POST" action="'. $_SERVER["PHP_SELF"] .'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 
-if($action == 'presendmail') {
 
 
 	include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
@@ -249,7 +260,6 @@ if($action == 'presendmail') {
 
 	print '<br>'."\n";
 
-}
 if ($resultmasssend)
 {
 	print '<br><strong>'.$langs->trans("ResultOfMassSending").':</strong><br>'."\n";
@@ -433,13 +443,7 @@ else
 {
 	dol_print_error($db);
 }
-if ($action != 'presendmail')
-{
-	print '<div class="tabsAction">';
-	print '<a href="'.$_SERVER["PHP_SELF"].'?modesendemail=presendmail&action=presendmail" class="butAction" name="buttonenvoireconduction" value="'.dol_escape_htmltag($langs->trans("EnvoiReconduction")).'">'.$langs->trans("EnvoiReconduction").'</a>';
-	print '</div>';
-	print '<br>';
-}
+
 
 print '</form>';
 
