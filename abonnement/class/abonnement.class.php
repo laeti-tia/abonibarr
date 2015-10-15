@@ -1,6 +1,8 @@
 <?php
 
 require_once (DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
+require_once (DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
+
 require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
 require_once (DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 require_once (DOL_DOCUMENT_ROOT."/product/class/product.class.php");
@@ -31,6 +33,26 @@ class Abonnement
 
 		return CommStructure::generate($objet->ref);
 	}
+	function updateExtrafieldsContrat($objet,$arrData) {
+		global $db;
+		$extrafields=new ExtraFields($db);
+		$extralabels=$extrafields->fetch_name_optionals_label('contrat',true);
+		//
+		//$objet = new Contrat($db);
+		foreach($extrafields->attribute_label as $key=>$label)
+		{
+			$key1='options_'.$key;
+			if (isset($arrData[$key]))
+			{
+				$objet->array_options[$key1]=$arrData[$key];
+			}
+		}
+		return $objet->insertExtraFields();
+	
+		//$objet->fetch_optionals($objet->id);
+		//var_dump($objet->array_options);exit;
+	
+	}
 	function updateExtrafieldsCommande($objet,$arrData) {
 		global $db;
 		$extrafields=new ExtraFields($db);
@@ -42,6 +64,22 @@ class Abonnement
 			if (isset($arrData[$key]))
 			{
 				$result=$object->setValueFrom($key, $arrData[$key], 'commande_extrafields');
+			}
+		}
+	}
+	function updateExtrafieldsContrat1($object,$arrData) {
+		global $db;
+		$extrafields=new ExtraFields($db);
+		$extralabels=$extrafields->fetch_name_optionals_label('contrat',true);
+		
+		foreach($extrafields->attribute_label as $key=>$label)
+		{   
+			$key1='options_'.$key;
+			if (isset($arrData[$key]))
+			{  // $object = new Contrat($db);
+				
+				$result=$object->setValueFrom($key, $arrData[$key], 'contrat_extrafields');
+				//var_dump($result);exit;
 			}
 		}
 	}
@@ -80,22 +118,55 @@ class Abonnement
 		$facture = new Facture($db);
 		// = new Contrat($db);
 		if(is_object($object)){
-
+			
 			$object->valid($user);
-			$cn = new commande($db);
-			$contrat = $this->createContratFromCommande($object);
-				
+			//$object = new commande($db);
+			$object->fetchObjectLinked('','','contrat');
+			$contratArr = $object->linkedObjects;
+			
+			if(isset($contratArr['contrat'])) {
+				$keyscontrat=array_keys($contratArr['contrat']);
+				$firstcontrat=$keyscontrat[0];
+				$contrat=$contratArr['contrat'][$firstcontrat];
+			}
+			else
+				$contrat = $this->createContratFromCommande($object);
+			
 			if (is_object($contrat) )
-			{
+			{    
 				$contrat->validate($user);
-				$t=$this->activeServiceContrat($contrat);
-
-				$facture = $this->createInvoiceFromContrat($contrat);
+				$contrat->fetchObjectLinked('','','facture');
+				$factureArr = $contrat->linkedObjects;
+				
+				
+				if(isset($factureArr['facture'])){
+					$keysfacture=array_keys($factureArr['facture']);
+					$firstfacture=$keysfacture[0];
+					$facture=$factureArr['facture'][$firstfacture];
+				}
+				else
+					$facture = $this->createInvoiceFromContrat($contrat);
+				
+				
+				//$factureArr = isset($contrat->linkedObjects["facture"])?$contrat->linkedObjects["facture"]:array();
+				//$factureArr = $contrat->linkedObjects;
+				
 				if (is_object($facture) ) {
 					$facture->validate($user);
 					// paiement
 					$r = $this->paiementFacture($facture, $montantPaie, $numCh, $id_accound);
 					if($r<0) $erro++;
+					
+					$montantpaye = 0;
+					foreach ($facture->getListOfPayments() as $paie) {
+							$montantpaye+=$paie ["amount"];
+					}
+						
+					
+					//var_dump($montantpaye >=$object->total_ttc,$montantpaye,$object->total_ttc);exit;
+					// si paiement complet activer le service
+					if($montantpaye >=$object->total_ttc) {
+					$t=$this->activeServiceContrat($contrat);
 					$param = $this->createLoginAbonne($contrat);
 					//var_dump($param);exit;
 					//creation user par defaut
@@ -103,10 +174,16 @@ class Abonnement
 					require_once(DOL_DOCUMENT_ROOT.'/abonnement/class/html.formabonnement.class.php');
 					$login = isset($param['login'])?$param['login']:'';
 					$password = isset($param['password'])?$param['password']:'';
+					$templatemail ='confirme_abon';
+					
+					} else {
+						$templatemail ='paiement_incomplet';
+					}
 					$formabonne = new FormAbonnement($db);
-					$formabonne->envoiEmailFacture($facture,$login,$password);
+					$formabonne->envoiEmailFacture($facture,$login,$password,$templatemail);
 
 				}else $erro++;
+				
 
 			} else {
 				$erro++;
@@ -124,7 +201,7 @@ class Abonnement
 		}
 	}
 	function createLoginAbonne($contrat) {
-		global $db;
+		global $db,$conf;
 		$arrLoginParam = array();
 		//$contrat = new Contrat($db);
 		if(is_object($contrat)) {
@@ -135,7 +212,7 @@ class Abonnement
 			$contact = $soc->contact;
 			$arrContact = $soc->contact_array();
 			//var_dump($arrContact,'user');exit;
-			//var_dump($arrContact);
+			//var_dump($arrContact,'login');
 			if(is_array($arrContact)&& count($arrContact)>0){
 				foreach ($arrContact as $contactid =>$label) {
 					$contact = new Contact($db);
@@ -144,7 +221,10 @@ class Abonnement
 					$nuser = new User($db);
 					$nuser->pass='passer';
 					$resultUser=$nuser->create_from_contact($contact,$contact->email,'passer');
-					//var_dump($resultUser);exit;
+					if( intval($conf->global->PROFIL_CLIENT)> 0 )
+					$nuser->SetInGroup(intval($conf->global->PROFIL_CLIENT), $nuser->entity);
+					
+					//var_dump($nuser->newgroupid,'user');exit;
 					$arrLoginParam = array('login'=>$nuser->login,'password'=>$nuser->pass);
 
 				}
@@ -262,25 +342,33 @@ class Abonnement
 
 	}
 	function reabonnement($contrat) {
-		global $langs;
+		global $langs,$user;
 		if(is_object($contrat)) {
-			$facture = $this->createInvoiceFromContact($contrat);
-			if($facture){
+			//$commande = $this->createInvoiceFromContact($contrat);
+			// creation de la commande
+			$commande = $this->createCommandeFromContrat($contrat);
+			
+			//ici
+			if($commande){
+				$this->updateExtrafieldsContrat($contrat, array('prop_renouv'=>1));
 				$outputlangs = $langs;
 				$newlang = '';
 				if ($conf->global->MAIN_MULTILANGS && empty($newlang) && GETPOST('lang_id')) $newlang = GETPOST('lang_id');
-				if ($conf->global->MAIN_MULTILANGS && empty($newlang)) $newlang = $facture->thirdparty->default_lang;
+				if ($conf->global->MAIN_MULTILANGS && empty($newlang)) $newlang = $commande->thirdparty->default_lang;
 				if (! empty($newlang))
 				{
 					$outputlangs = new Translate("", $conf);
 					$outputlangs->setDefaultLang($newlang);
 				}
-				$result = $facture->generateDocument($facture->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
+				$commande->valid($user);
+				$note = $this->updateExtrafieldsCommandeCommStruture($commande);
+				$commande->update_note_public('Communication structurée : '.$note);
+				$result = $commande->generateDocument($commande->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
 				//var_dump($result,'jjj');exit;
 
 			}
 			//var_dump($result,'444jj');exit;
-			return $facture;
+			return $commande;
 		}
 
 	}
@@ -411,7 +499,113 @@ class Abonnement
 		}
 		else return -1;
 	}
-
+    
+	/**
+	 *  Load an object from an order and create a new invoice into database
+	 *
+	 *  @param      Object			$object         	Object source
+	 *  @return     int             					<0 if KO, 0 if nothing done, 1 if OK
+	 */
+	function createCommandeFromContrat($object)
+	{
+		global $conf,$user,$langs,$hookmanager;
+	
+		$erro=0;
+		$commande = new Commande($this->db);
+		// Closed order
+		$commande->date = dol_now();
+		$commande->source = 0;
+		//$object = new Contrat($this->db);
+		$object->fetch_lines();
+		$num=count($object->lines);
+		for ($i = 0; $i < $num; $i++)
+		{
+		$line = new OrderLine($this->db);
+	
+		$line->libelle			= $object->lines[$i]->libelle;
+		$line->label			= $object->lines[$i]->label;
+		$line->desc				= $object->lines[$i]->desc;
+		$line->subprice			= $object->lines[$i]->subprice;
+		$line->total_ht			= $object->lines[$i]->total_ht;
+		$line->total_tva		= $object->lines[$i]->total_tva;
+		$line->total_ttc		= $object->lines[$i]->total_ttc;
+		$line->tva_tx			= $object->lines[$i]->tva_tx;
+		$line->localtax1_tx		= $object->lines[$i]->localtax1_tx;
+		$line->localtax2_tx		= $object->lines[$i]->localtax2_tx;
+		$line->qty				= $object->lines[$i]->qty;
+		$line->fk_remise_except	= $object->lines[$i]->fk_remise_except;
+		$line->remise_percent	= $object->lines[$i]->remise_percent;
+		$line->fk_product		= $object->lines[$i]->fk_product;
+		$line->info_bits		= $object->lines[$i]->info_bits;
+		$line->product_type		= 0;//$object->lines[$i]->product_type;
+		$line->rang				= $object->lines[$i]->rang;
+		$line->special_code		= $object->lines[$i]->special_code;
+		$line->fk_parent_line	= $object->lines[$i]->fk_parent_line;
+	
+		$line->fk_fournprice	= $object->lines[$i]->fk_fournprice;
+		$marginInfos			= getMarginInfos($object->lines[$i]->subprice, $object->lines[$i]->remise_percent, $object->lines[$i]->tva_tx, $object->lines[$i]->localtax1_tx, $object->lines[$i]->localtax2_tx, $object->lines[$i]->fk_fournprice, $object->lines[$i]->pa_ht);
+		$line->pa_ht			= $marginInfos[0];
+		$line->marge_tx			= $marginInfos[1];
+		$line->marque_tx		= $marginInfos[2];
+	
+	
+		// get extrafields from original line
+		// 			$object->lines[$i]->fetch_optionals($object->lines[$i]->rowid);
+		// 			foreach($object->lines[$i]->array_options as $options_key => $value)
+			// 				$line->array_options[$options_key] = $value;
+	
+		$commande->lines[$i] = $line;
+		}
+	
+		$commande->socid                = $object->socid;
+		$commande->fk_project           = $object->fk_project;
+		$commande->cond_reglement_id    = $object->cond_reglement_id;
+		$commande->mode_reglement_id    = $object->mode_reglement_id;
+		$commande->availability_id      = $object->availability_id;
+		$commande->demand_reason_id     = $object->demand_reason_id;
+		$commande->date_livraison       = $object->date_livraison;
+		$commande->fk_delivery_address  = $object->fk_delivery_address;
+		$commande->contact_id           = $object->contactid;
+		$commande->ref_client           = $object->ref_client;
+		$commande->note_private         = $object->note_private;
+		$commande->note_public          = $object->note_public;
+	
+		//$commande->origin				= $object->element;
+		$commande->origin_id			= $object->id;
+	
+		// get extrafields from original line
+		$object->fetch_optionals($object->id);
+		// 		foreach($object->array_options as $options_key => $value)
+		// 			$commande->array_options[$options_key] = $value;
+	
+		// Possibility to add external linked objects with hooks
+// 		$commande->linked_objects[$commande->origin] = $commande->origin_id;
+// 		if (! empty($object->other_linked_objects) && is_array($object->other_linked_objects))
+// 		{
+// 		$commande->linked_objects = array_merge($commande->linked_objects, $object->other_linked_objects);
+// 		}
+	
+		$ret = $commande->create($user);
+		$commande->fetch_thirdparty();
+	
+		if ($ret > 0)
+		{
+		// Actions hooked (by external module)
+		//$hookmanager->initHooks(array('invoicedao'));
+	
+			$parameters=array('objFrom'=>$object);
+			$action='';
+			$reshook=$hookmanager->executeHooks('createFrom',$parameters,$commande,$action);    // Note that $action and $object may have been modified by some hooks
+			if ($reshook < 0) $erro++;
+	
+			if (! $erro)
+			{
+			return $commande;
+			}
+			else return -1;
+			}
+			else return -1;
+			}
 	/**
 	 *  Load an object from an order and create a new contrat into database
 	 *

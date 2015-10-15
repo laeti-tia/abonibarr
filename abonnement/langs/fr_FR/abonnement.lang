@@ -37,6 +37,8 @@ NBAbonnement = Nombre de relance
 NBRE_JOURS_AVANT_RENOUVELLEMENT = Nombre de jours avant le renouvellement de l'abonnement
 NBRE_MAX_ABONNE_WEB = Nombre maximum d'abonné web
 ABONListTropPercu = Facture trop perçu
+PROFIL_CLIENT = Profil par défaut du client
+PROFIL_ABONNE_WEB = Profil d'abonné web
 #
 # Page À propos
 #
@@ -94,7 +96,9 @@ MailTopicSendInvoices = Résultat de l'envoi des réabonnements en masse par ema
 sendReabonnement = Envoyer les factures de réabonnement
 # Export
 #
-
+CONTACTPAPERCONTRACT = Contacts Papiers
+contrat_line = Ligne de contrat
+CONTACTOFCONTRACT = Contact par contrat 
 #
 # List
 REABONNEMENTLIST = Liste des réabonnements

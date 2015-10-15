@@ -63,6 +63,17 @@ $scandir = GETPOST('scandir', 'alpha');
 	if (! $res > 0)
 		$error ++;
 	
+	$profil_client = GETPOST('PROFIL_CLIENT', 'int');
+	if (! empty($nb_renouvel)) {
+		$res = dolibarr_set_const($db, 'PROFIL_CLIENT', $profil_client, 'chaine', 0, '', $conf->entity);
+	}
+	$profil_abonne = GETPOST('PROFIL_ABONNE_WEB', 'int');
+	if (! empty($nb_max_abonne)) {
+		$res = dolibarr_set_const($db, 'PROFIL_ABONNE_WEB', $profil_abonne, 'chaine', 0, '', $conf->entity);
+	}
+	if (! $res > 0)
+		$error ++;
+	
 	
 	
 	if (! $error) {
@@ -115,6 +126,22 @@ print '</tr>';
 print '<tr class="impair"><td>' . $langs->trans("NBRE_MAX_ABONNE_WEB") . '</td>';
 print '<td align="left">';
 print '<input type="text" name="NBRE_MAX_ABONNE_WEB" value="' . $conf->global->NBRE_MAX_ABONNE_WEB . '" size="4" ></td>';
+print '</tr>';
+
+// Profil client
+print '<tr class="pair"><td>' . $langs->trans("PROFIL_CLIENT") . '</td>';
+print '<td align="left">';
+//print '<input type="text" name="PROFIL_CLIENT" value="' . $conf->global->PROFIL_CLIENT . '" size="4" >';
+print $form->select_dolgroups($conf->global->PROFIL_CLIENT, 'PROFIL_CLIENT', 1, array(), 0, '', '', $conf->entity);
+print '</td>';
+print '</tr>';
+
+// Profil  d'abonné web
+print '<tr class="impair"><td>' . $langs->trans("PROFIL_ABONNE_WEB") . '</td>';
+print '<td align="left">';
+//print '<input type="text" name="PROFIL_ABONNE_WEB" value="' . $conf->global->PROFIL_ABONNE_WEB . '" size="4" >';
+print $form->select_dolgroups($conf->global->PROFIL_ABONNE_WEB, 'PROFIL_ABONNE_WEB', 1, array(), 0, '', '', $conf->entity);
+print '</td>';
 print '</tr>';
 
 print '</table>';

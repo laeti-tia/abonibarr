@@ -16,5 +16,8 @@ INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, mo
 INSERT INTO llx_c_type_contact(rowid, element, source, code, libelle, active, module) VALUES (6000022,'contrat','external','ABONWEB','Abonné web','1',null);
 
 
+insert into llx_contrat_extrafields (`fk_object`) select rowid from llx_contrat where rowid not in ( SELECT c.rowid FROM llx_contrat as c, `llx_contrat_extrafields` as ce WHERE c.rowid=ce.fk_object);
+
+
 
 

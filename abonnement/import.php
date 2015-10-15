@@ -1089,7 +1089,7 @@ if ($step == 5 && $datatoimport)
 		$sourcelinenb=0; $endoffile=0;
 		require_once DOL_DOCUMENT_ROOT.'/abonnement/class/abonnement.class.php';
 		require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
-		
+		require_once DOL_DOCUMENT_ROOT.'/abonnement/class/virementcmde.class.php';
 		$error ='';
 		$errors = array();
 		$nbreCommStructureSuccess =array();
@@ -1114,13 +1114,17 @@ if ($step == 5 && $datatoimport)
 			//echo '<br>'.$montant;
 			//($montant=floatval(str_replace(',', '.', $montant)));
 			$resp =CommStructure::isCommStructure($libelle);
-			//var_dump($resp['response']);
+			
 			if($resp['response']) {
 				$montant = $arrayrecord[6]['val'];
 				$montant = floatval(str_replace(',', '.', $montant));
-				$devise = $arrayrecord[7]['val'];
-				$datepaiement = $arrayrecord[4]['val'];
+				$devise = trim($arrayrecord[7]['val']);
+				$datepaiement = trim($arrayrecord[4]['val']);
+				//var_dump(date('y-m-d',getTimestamp($datepaiement)),$datepaiement);exit;
+				
 				$refCmdComm = $resp['matches'][0];
+				$num_mvt = trim($arrayrecord[3]['val']);
+				$comm_structure = $resp['matches'][0];
 				$nbreCommStructure[] =array('devise'=>$devise,'montant'=>$montant,
 						'datepaiement'=>$datepaiement,'comm'=>$resp['matches'][0]);
 				
@@ -1128,22 +1132,25 @@ if ($step == 5 && $datatoimport)
 				$abonne = new Abonnement($db);
 				$cmd = new Commande($db);
 				//$abonne->updateExtrafieldsCommande($cmd, array());
+				$histvire = new Virementcmde($db);
+				
+				if(!$histvire->isExiste($comm_structure,$num_mvt,getTimestamp($datepaiement))) {
 				$refCmd = CommStructure::getRefcommande($refCmdComm);
-				//$refCmd = $arrayrecord[0] ["val"];
-				//$montant = $arrayrecord[5] ["val"];
-				//$bank = $arrayrecord[6] ["val"];
+				
 				$re = $cmd->fetch(null,trim($refCmd)); 
-				//var_dump($refCmd);
+				
 				if($re>0) {
 					$db->begin();
+				//	$cmd = new Commande($db);
 					
 				$re = $cmd->cloture($user);
-				
 				 $re = $abonne->createInvoiceAndContratFromCommande($cmd,abs($montant),'1',GETPOST('accountid'));
-				// var_dump($re,'');exit;
+				//var_dump($re,'fin');exit;
+				//var_dump($refCmd);
 				 if(!$re) {
 				 	$errors[] =$abonne->errors;
 				 }	
+				 
 				 if (count($errors)>0) { 
 				 	$arrayoferrors[$sourcelinenb]=$errors;
 				 	$db->rollback();
@@ -1153,29 +1160,37 @@ if ($step == 5 && $datatoimport)
 				 	$nbok++;
 				 	$nbreCommStructureSuccess[] =array('devise'=>$devise,'montant'=>$montant,
 				 			'datepaiement'=>$datepaiement,'comm'=>$resp['matches'][0],'orderRef'=>$cmd->ref);
+				 	$histvire = new Virementcmde($db);
+				 	$histvire->montant = $montant;
+				 	$histvire->devise = $devise;
+				 	$histvire->communication = $resp['matches'][0];
+				 	$histvire->date_mvt = getTimestamp($datepaiement);
+				 	$histvire->num_mvt = $num_mvt;
+				 	$histvire->fk_commande = $cmd->id;
+				 	$res = $histvire->create($user);
+				 	//var_dump($datepaiement,'hhh');
+				 	///var_dump($res);exit;
 				 	$db->commit();
 				 }
 				 
 				} else {
-					$errors[] ="La commande avec la reference <b> $refCmd</b> n'existe pas";
+					$errors[] ="La commande avec la référence <b> $refCmd</b> n'existe pas";
 				}
+			} else {
+				$refCmd = CommStructure::getRefcommande($refCmdComm);
+				$re = $cmd->fetch(null,trim($refCmd));
 				
+				$warrings [] = "La commande avec la référence <b> <a class='butAction' href=' ".DOL_URL_ROOT."/commande/card.php?id=$cmd->id '>"."$refCmd </a></b> déjà payée	";
+				//var_dump($warrings);exit;
+			}
+			//var_dump($warring);exit;
 		}
-// 			require_once DOL_DOCUMENT_ROOT.'/abonnement/class/communication_structure.class.php';
-// 			$expression =CommStructure::generate('CO0501-0001');
-// 			var_dump($expression,'CO0501-0001');
-			
-// 			$expression1 =CommStructure::isCommStructure($expression);
-// 			var_dump($expression1,'communication valide');
-// 			$expression =CommStructure::getRefcommande($expression);
-			
-// 			//$r = generate_structured_communication('0015070003');
-// 			var_dump($expression,'ref');exit;
-	
-			//
-			//$result=$obj->import_insert($arrayrecord,$array_match_file_to_database,$objimport,count($fieldssource),$importid);
-	
-			
+        if(count($errors)) {
+        	$arrayoferrors [$sourcelinenb]=$errors;
+        }
+        if(count($warrings)) {
+        	$arrayofwarnings [$sourcelinenb]=$warrings;
+        }	
 		} 
 		// Close file
 		$obj->import_close_file();
@@ -1214,6 +1229,28 @@ if ($step == 5 && $datatoimport)
     	print '<br>';
     }
 
+    
+    if (count($arrayofwarnings))
+    {
+    	print img_warning().' <b>'.$langs->trans("WarningsOnXLines",count($arrayofwarnings)).'</b><br>';
+    	print '<table width="100%" class="border"><tr><td>';
+    	foreach ($arrayofwarnings as $key => $val)
+    	{
+    		$nbofwarnings++;
+    		if ($nbofewarnings > $maxnboferrors)
+    		{
+    			print $langs->trans("TooMuchWarning",(count($nbofewarnings)-$nbofwarnings))."<br>";
+    			break;
+    		}
+    		print '* '.$langs->trans("Line").' '.$key.'<br>';
+    		foreach($val as $i => $warn)
+    		{
+    			print ' &nbsp; &nbsp; > '.$warn.'<br>';
+    		}
+    	}
+    	print '</td></tr></table>';
+    	print '<br>';
+    }
 
 	// Show result
 	print '<center>';
@@ -1356,3 +1393,10 @@ function getnewkey(&$fieldssource,&$listofkey)
 	return $i;
 }
 
+
+function getTimestamp($mydate){
+	$mydate = str_replace('.', '/', $mydate);
+	$mydate = str_replace('-', '/', $mydate);
+	@list($jour,$mois,$annee)=explode('/',$mydate);
+   return mktime(0,0,0,$mois,$jour,$annee);
+}

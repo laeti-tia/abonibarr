@@ -379,7 +379,8 @@ class FormAbonnement extends Form
 
 				$mesg = make_substitutions($mesg, $substit);
 				$subject  =$arraydefaultmessage ['topic'];
-				$topic = make_substitutions($topic, $substit);
+				$subject = make_substitutions($subject, $substit);
+				//$topic = make_substitutions($topic, $substit);
 				// Create form object
 				$attachedfiles=array('paths'=>array($file), 'names'=>array($filename), 'mimes'=>array($mime));
 				$filepath = $attachedfiles['paths'];
@@ -388,7 +389,7 @@ class FormAbonnement extends Form
 
 				//$from = ($conf->notification->email_from)?$conf->notification->email_from:$fuser->email;
 				$mailfile = new CMailFile(
-						$topic,
+						$subject,
 						$sendto,
 						$from,
 						$mesg,
@@ -424,7 +425,7 @@ class FormAbonnement extends Form
 		}
 	}
 	
-	function envoiEmailFacture($object,$login,$password,$fuser=null) {
+	function envoiEmailFacture($object,$login,$password,$tempmail='confirme_abon',$fuser=null) {
 		global $user,$langs,$conf,$db;
 		if(!is_object($object)) return -1;
 		require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');

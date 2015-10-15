@@ -99,7 +99,7 @@ if ($action == 'addabonne' && $user->rights->contrat->creer)
 				if($result > 0) {
 					$nuser = new User($db);
 					$resultUser=$nuser->create_from_contact($objContact,$objContact->email,$password);
-
+					$nuser->SetInGroup(1, $nuser->entity);
 					if ($resultUser < 0)
 					{
 						$langs->load("errors");
