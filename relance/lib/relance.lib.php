@@ -39,7 +39,12 @@ function relanceAdminPrepareHead()
 	
 	$head[$h][0] = dol_buildpath("/relance/admin/relance_param.php", 1);
 	$head[$h][1] = $langs->trans("PARAMRELANCE");
-	$head[$h][2] = '';
+	$head[$h][2] = 'param';
+	$h ++;
+	
+	$head[$h][0] = dol_buildpath("/relance/admin/type_relance.php", 1);
+	$head[$h][1] = $langs->trans("TYPERELANCE");
+	$head[$h][2] = 'TYPERELANCE';
 	$h ++;
 	
 	$head[$h][0] = dol_buildpath("/relance/admin/about.php", 1);

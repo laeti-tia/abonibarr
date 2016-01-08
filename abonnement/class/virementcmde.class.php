@@ -18,34 +18,40 @@
  */
 
 /**
- *  \file       dev/skeletons/relance.class.php
+ *  \file       dev/skeletons/virementcmde.class.php
  *  \ingroup    mymodule othermodule1 othermodule2
  *  \brief      This file is an example for a CRUD class file (Create/Read/Update/Delete)
- *				Initialy built by build_class_from_table on 2015-07-06 00:50
+ *				Initialy built by build_class_from_table on 2015-09-22 00:39
  */
 
 // Put here all includes required by your class file
 require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
-require_once DOL_DOCUMENT_ROOT.'/relance/class/crelancetype.class.php';
+//require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
+//require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 
 
 /**
  *	Put here description of your class
  */
-class Relance extends CommonObject
+class Virementcmde extends CommonObject
 {
 	var $db;							//!< To store db handler
 	var $error;							//!< To return error code (or message)
 	var $errors=array();				//!< To return several error codes (or messages)
-	var $element='relance';			//!< Id that identify managed objects
-	var $table_element='relance';		//!< Name of table without prefix where object is stored
+	var $element='virementcmde';			//!< Id that identify managed objects
+	var $table_element='virement_cmde';		//!< Name of table without prefix where object is stored
 
     var $id;
     
-	var $fk_type_relance;
-	var $envoi_email;
-	var $textemail;
-	var $sujet_email;
+	var $num_mvt;
+	var $date_mvt='';
+	var $montant;
+	var $devise;
+	var $fk_commande;
+	var $communication;
+	var $fk_user_author;
+	var $fk_user_mod;
+	var $fk_user_valid;
 
     
 
@@ -76,11 +82,16 @@ class Relance extends CommonObject
 
 		// Clean parameters
         
-		if (isset($this->fk_type_relance)) $this->fk_type_relance=trim($this->fk_type_relance);
-		if (isset($this->envoi_email)) $this->envoi_email=trim($this->envoi_email);
-		if (isset($this->textemail)) $this->textemail=trim($this->textemail);
-		if (isset($this->sujet_email)) $this->sujet_email=trim($this->sujet_email);
-		
+		if (isset($this->num_mvt)) $this->num_mvt=trim($this->num_mvt);
+		if (isset($this->montant)) $this->montant=trim($this->montant);
+		if (isset($this->devise)) $this->devise=trim($this->devise);
+		if (isset($this->fk_commande)) $this->fk_commande=trim($this->fk_commande);
+		if (isset($this->communication)) $this->communication=trim($this->communication);
+		if (isset($this->fk_user_author)) $this->fk_user_author=trim($this->fk_user_author);
+		if (isset($this->fk_user_mod)) $this->fk_user_mod=trim($this->fk_user_mod);
+		if (isset($this->fk_user_valid)) $this->fk_user_valid=trim($this->fk_user_valid);
+
+        
 
 		// Check parameters
 		// Put here code to add control on parameters values
@@ -88,18 +99,29 @@ class Relance extends CommonObject
         // Insert request
 		$sql = "INSERT INTO ".MAIN_DB_PREFIX.$this->table_element."(";
 		
-		$sql.= "fk_type_relance,";
-		$sql.= "envoi_email,";
-		$sql.= "textemail,";
-        $sql.="sujet_email";
+		$sql.= "num_mvt,";
+		$sql.= "date_mvt,";
+		$sql.= "montant,";
+		$sql.= "devise,";
+		$sql.= "fk_commande,";
+		$sql.= "communication,";
+		$sql.= "fk_user_author,";
+		$sql.= "fk_user_mod,";
+		$sql.= "fk_user_valid";
+
 		
         $sql.= ") VALUES (";
         
-		$sql.= " ".(! isset($this->fk_type_relance)?'NULL':"'".$this->fk_type_relance."'").",";
-		$sql.= " ".(! isset($this->envoi_email)?'NULL':"'".$this->envoi_email."'").",";
-		$sql.= " ".(! isset($this->textemail)?'NULL':"'".$this->db->escape($this->textemail)."'").",";
-		$sql.= " ".(! isset($this->sujet_email)?'NULL':"'".$this->db->escape($this->sujet_email)."'")."";
-		
+		$sql.= " ".(! isset($this->num_mvt)?'NULL':"'".$this->num_mvt."'").",";
+		$sql.= " ".(! isset($this->date_mvt) || dol_strlen($this->date_mvt)==0?'NULL':"'".$this->db->idate($this->date_mvt)."'").",";
+		$sql.= " ".(! isset($this->montant)?'NULL':"'".$this->montant."'").",";
+		$sql.= " ".(! isset($this->devise)?'NULL':"'".$this->devise."'").",";
+		$sql.= " ".(! isset($this->fk_commande)?'NULL':"'".$this->fk_commande."'").",";
+		$sql.= " ".(! isset($this->communication)?'NULL':"'".$this->db->escape($this->communication)."'").",";
+		$sql.= " ".(! isset($this->fk_user_author)?'NULL':"'".$this->fk_user_author."'").",";
+		$sql.= " ".(! isset($this->fk_user_mod)?'NULL':"'".$this->fk_user_mod."'").",";
+		$sql.= " ".(! isset($this->fk_user_valid)?'NULL':"'".$this->fk_user_valid."'")."";
+
         
 		$sql.= ")";
 		$this->db->begin();
@@ -128,7 +150,7 @@ class Relance extends CommonObject
         if ($error)
 		{
 			foreach($this->errors as $errmsg)
-			{
+			{  var_dump($errmsg);
 	            dol_syslog(__METHOD__." ".$errmsg, LOG_ERR);
 	            $this->error.=($this->error?', '.$errmsg:$errmsg);
 			}
@@ -154,16 +176,22 @@ class Relance extends CommonObject
     {
     	global $langs;
         $sql = "SELECT";
-		$sql.= " t.fk_type_relance,";
+		$sql.= " t.rowid,";
 		
-		$sql.= " t.fk_type_relance,";
-		$sql.= " t.envoi_email,";
-		$sql.= " t.textemail,";
-		$sql.= " t.sujet_email";
+		$sql.= " t.num_mvt,";
+		$sql.= " t.date_mvt,";
+		$sql.= " t.montant,";
+		$sql.= " t.devise,";
+		$sql.= " t.fk_commande,";
+		$sql.= " t.communication,";
+		$sql.= " t.fk_user_author,";
+		$sql.= " t.fk_user_mod,";
+		$sql.= " t.fk_user_valid";
+
 		
         $sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
         if ($ref) $sql.= " WHERE t.ref = '".$ref."'";
-        else $sql.= " WHERE t.fk_type_relance = ".$id;
+        else $sql.= " WHERE t.rowid = ".$id;
 
     	dol_syslog(get_class($this)."::fetch");
         $resql=$this->db->query($sql);
@@ -173,12 +201,18 @@ class Relance extends CommonObject
             {
                 $obj = $this->db->fetch_object($resql);
 
-                $this->id    = $obj->fk_type_relance;
+                $this->id    = $obj->rowid;
                 
-				$this->fk_type_relance = $obj->fk_type_relance;
-				$this->envoi_email = $obj->envoi_email;
-				$this->textemail = $obj->textemail;
-                $this->sujet_email = $obj->sujet_email;
+				$this->num_mvt = $obj->num_mvt;
+				$this->date_mvt = $this->db->jdate($obj->date_mvt);
+				$this->montant = $obj->montant;
+				$this->devise = $obj->devise;
+				$this->fk_commande = $obj->fk_commande;
+				$this->communication = $obj->communication;
+				$this->fk_user_author = $obj->fk_user_author;
+				$this->fk_user_mod = $obj->fk_user_mod;
+				$this->fk_user_valid = $obj->fk_user_valid;
+
                 
             }
             $this->db->free($resql);
@@ -207,11 +241,15 @@ class Relance extends CommonObject
 
 		// Clean parameters
         
-		if (isset($this->fk_type_relance)) $this->fk_type_relance=trim($this->fk_type_relance);
-		if (isset($this->envoi_email)) $this->envoi_email=trim($this->envoi_email);
-		if (isset($this->textemail)) $this->textemail=trim($this->textemail);
-		if (isset($this->sujet_email)) $this->sujet_email=trim($this->sujet_email);
-		
+		if (isset($this->num_mvt)) $this->num_mvt=trim($this->num_mvt);
+		if (isset($this->montant)) $this->montant=trim($this->montant);
+		if (isset($this->devise)) $this->devise=trim($this->devise);
+		if (isset($this->fk_commande)) $this->fk_commande=trim($this->fk_commande);
+		if (isset($this->communication)) $this->communication=trim($this->communication);
+		if (isset($this->fk_user_author)) $this->fk_user_author=trim($this->fk_user_author);
+		if (isset($this->fk_user_mod)) $this->fk_user_mod=trim($this->fk_user_mod);
+		if (isset($this->fk_user_valid)) $this->fk_user_valid=trim($this->fk_user_valid);
+
         
 
 		// Check parameters
@@ -220,13 +258,18 @@ class Relance extends CommonObject
         // Update request
         $sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET";
         
-		$sql.= " fk_type_relance=".(isset($this->fk_type_relance)?$this->fk_type_relance:"null").",";
-		$sql.= " envoi_email=".(isset($this->envoi_email)?$this->envoi_email:"null").",";
-		$sql.= " textemail=".(isset($this->textemail)?"'".$this->db->escape($this->textemail)."'":"null").",";
-		$sql.= " sujet_email=".(isset($this->sujet_email)?"'".$this->db->escape($this->sujet_email)."'":"null")."";
-		
+		$sql.= " num_mvt=".(isset($this->num_mvt)?$this->num_mvt:"null").",";
+		$sql.= " date_mvt=".(dol_strlen($this->date_mvt)!=0 ? "'".$this->db->idate($this->date_mvt)."'" : 'null').",";
+		$sql.= " montant=".(isset($this->montant)?$this->montant:"null").",";
+		$sql.= " devise=".(isset($this->devise)?$this->devise:"null").",";
+		$sql.= " fk_commande=".(isset($this->fk_commande)?$this->fk_commande:"null").",";
+		$sql.= " communication=".(isset($this->communication)?"'".$this->db->escape($this->communication)."'":"null").",";
+		$sql.= " fk_user_author=".(isset($this->fk_user_author)?$this->fk_user_author:"null").",";
+		$sql.= " fk_user_mod=".(isset($this->fk_user_mod)?$this->fk_user_mod:"null").",";
+		$sql.= " fk_user_valid=".(isset($this->fk_user_valid)?$this->fk_user_valid:"null")."";
+
         
-        $sql.= " WHERE fk_type_relance=".$this->id;
+        $sql.= " WHERE rowid=".$this->id;
 
 		$this->db->begin();
 
@@ -298,7 +341,7 @@ class Relance extends CommonObject
 		if (! $error)
 		{
     		$sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element;
-    		$sql.= " WHERE fk_type_relance=".$this->id;
+    		$sql.= " WHERE rowid=".$this->id;
 
     		dol_syslog(__METHOD__);
     		$resql = $this->db->query($sql);
@@ -337,7 +380,7 @@ class Relance extends CommonObject
 
 		$error=0;
 
-		$object=new Relance($this->db);
+		$object=new Virementcmde($this->db);
 
 		$this->db->begin();
 
@@ -389,21 +432,53 @@ class Relance extends CommonObject
 	{
 		$this->id=0;
 		
-		$this->fk_type_relance='';
-		$this->envoi_email='';
-		$this->textemail='';
-		$this->sujet_email='';
+		$this->num_mvt='';
+		$this->date_mvt='';
+		$this->montant='';
+		$this->devise='';
+		$this->fk_commande='';
+		$this->communication='';
+		$this->fk_user_author='';
+		$this->fk_user_mod='';
+		$this->fk_user_valid='';
 
 		
 	}
-    
-	/*
-	 * 
-	 */
-	function getLabelTypeRelance($idrelance) {
-		$typeRelance = new Crelancetype($this->db);
-		$typeRelance->fetch($this->fk_type_relance);
-		var_dump($typeRelance->nbre_jours);exit;
-		return $typeRelance->label;
+	
+	
+	function isExiste($comm_structure,$num_mvt,$date_mvt_timestamp) {
+		$sql =" SELECT rowid ";
+		$sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
+		$sql.= " WHERE communication = '".$comm_structure."'";
+		$sql.= "  AND num_mvt = '".$num_mvt."'";
+		
+		$sql.= " AND date_mvt = '".$this->db->idate($date_mvt_timestamp)."'";
+		$resql=$this->db->query($sql);
+		
+		if ($resql)
+		{
+			/* if ($this->db->num_rows($resql))
+			{
+				
+			}
+			$this->db->free($resql);
+			
+			return 1; */
+			$nbre = $this->db->num_rows($resql);
+			$this->db->free($resql);
+			return $nbre;
+		}
+		
+		else
+		{
+			$this->error="Error ".$this->db->lasterror();
+			//var_dump(($this->error));exit;
+			return 1;
+		}
+		
+		
+		
+		
 	}
+
 }

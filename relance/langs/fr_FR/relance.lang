@@ -35,11 +35,13 @@ RelanceAdmVar=Administration
 RelanceUserGroupAffect = Limiter les utilisateurs affectables à une affaire au groupe
 RELANCEAUT = Relance Automatique
 NBRERELANCE = Nombre de relance
-PARAMRELANCE = Paramètre relance
+PARAMRELANCE = contenus des relances
 OBJECTMESSAGE = Object 
 MESSAGEEMAIL = Message
 CommonSubstitutions = Substitutions communes
 EnvoiEmail = Envoyer un Email ?
+RelanceType = Type de relance
+TYPERELANCE = Type de relance
 #
 # Page À propos
 #

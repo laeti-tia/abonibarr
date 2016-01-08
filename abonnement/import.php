@@ -926,7 +926,7 @@ if ($step == 4 && $datatoimport)
 	
 	// Tables imported
 	print '<tr><td width="25%">';
-	print $langs->trans("Nombre de communication structurée .");
+	print $langs->trans("Nombre de communications structurées .");
 	print '</td><td>';
 	print count($nbreCommStructure);
 	print '</td></tr>';
@@ -1150,6 +1150,7 @@ if ($step == 5 && $datatoimport)
 				 if(!$re) {
 				 	$errors[] =$abonne->errors;
 				 }	
+				 if($abonne->warring) $warrings[]=$abonne->warring;
 				 
 				 if (count($errors)>0) { 
 				 	$arrayoferrors[$sourcelinenb]=$errors;
@@ -1260,7 +1261,7 @@ if ($step == 5 && $datatoimport)
 	else print $langs->trans("NbOfLinesOK",$nbok).'</b><br><br>';
 	
 	print $langs->trans("NbOfLinesImported",$nbok).'</b><br><br>';
-	print $langs->trans("Nombre de communication structurée").' : '.count($nbreCommStructure).'<br>';
+	print $langs->trans("Nombre de communications structurées").' : '.count($nbreCommStructure).'<br>';
 	//print $langs->trans("YouCanUseImportIdToFindRecord",$importid).'<br>';
 	if(count($nbreCommStructureSuccess) > 0) {
 	echo '<table>';

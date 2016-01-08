@@ -18,36 +18,34 @@
  */
 
 /**
- *  \file       dev/skeletons/relance.class.php
+ *  \file       dev/skeletons/TexteDocument.class.php
  *  \ingroup    mymodule othermodule1 othermodule2
  *  \brief      This file is an example for a CRUD class file (Create/Read/Update/Delete)
- *				Initialy built by build_class_from_table on 2015-07-06 00:50
+ *				Initialy built by build_class_from_table on 2015-07-06 00:47
  */
 
 // Put here all includes required by your class file
 require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
-require_once DOL_DOCUMENT_ROOT.'/relance/class/crelancetype.class.php';
+//require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
+//require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 
 
 /**
  *	Put here description of your class
  */
-class Relance extends CommonObject
+class TexteDocument extends CommonObject
 {
 	var $db;							//!< To store db handler
 	var $error;							//!< To return error code (or message)
 	var $errors=array();				//!< To return several error codes (or messages)
-	var $element='relance';			//!< Id that identify managed objects
-	var $table_element='relance';		//!< Name of table without prefix where object is stored
+	var $element='TexteDocument';			//!< Id that identify managed objects
+	var $table_element='c_texte_document';		//!< Name of table without prefix where object is stored
 
     var $id;
     
-	var $fk_type_relance;
-	var $envoi_email;
-	var $textemail;
-	var $sujet_email;
-
-    
+	var $code;
+	var $label;
+	
 
 
     /**
@@ -76,11 +74,12 @@ class Relance extends CommonObject
 
 		// Clean parameters
         
-		if (isset($this->fk_type_relance)) $this->fk_type_relance=trim($this->fk_type_relance);
-		if (isset($this->envoi_email)) $this->envoi_email=trim($this->envoi_email);
-		if (isset($this->textemail)) $this->textemail=trim($this->textemail);
-		if (isset($this->sujet_email)) $this->sujet_email=trim($this->sujet_email);
-		
+		if (isset($this->code)) $this->code=trim($this->code);
+		if (isset($this->label)) $this->label=trim($this->label);
+		if (isset($this->nbre_jours)) $this->nbre_jours=trim($this->nbre_jours);
+		if (isset($this->description)) $this->description=trim($this->description);
+
+        
 
 		// Check parameters
 		// Put here code to add control on parameters values
@@ -88,20 +87,22 @@ class Relance extends CommonObject
         // Insert request
 		$sql = "INSERT INTO ".MAIN_DB_PREFIX.$this->table_element."(";
 		
-		$sql.= "fk_type_relance,";
-		$sql.= "envoi_email,";
-		$sql.= "textemail,";
-        $sql.="sujet_email";
+		$sql.= "code,";
+		$sql.= "label,";
+		$sql.= "nbre_jours,";
+		$sql.= "description";
+
 		
         $sql.= ") VALUES (";
         
-		$sql.= " ".(! isset($this->fk_type_relance)?'NULL':"'".$this->fk_type_relance."'").",";
-		$sql.= " ".(! isset($this->envoi_email)?'NULL':"'".$this->envoi_email."'").",";
-		$sql.= " ".(! isset($this->textemail)?'NULL':"'".$this->db->escape($this->textemail)."'").",";
-		$sql.= " ".(! isset($this->sujet_email)?'NULL':"'".$this->db->escape($this->sujet_email)."'")."";
-		
+		$sql.= " ".(! isset($this->code)?'NULL':"'".$this->db->escape($this->code)."'").",";
+		$sql.= " ".(! isset($this->label)?'NULL':"'".$this->db->escape($this->label)."'").",";
+		$sql.= " ".(! isset($this->nbre_jours)?'NULL':"'".$this->nbre_jours."'").",";
+		$sql.= " ".(! isset($this->description)?'NULL':"'".$this->db->escape($this->description)."'")."";
+
         
 		$sql.= ")";
+
 		$this->db->begin();
 
 	   	dol_syslog(__METHOD__, LOG_DEBUG);
@@ -154,16 +155,17 @@ class Relance extends CommonObject
     {
     	global $langs;
         $sql = "SELECT";
-		$sql.= " t.fk_type_relance,";
+		$sql.= " t.rowid,";
 		
-		$sql.= " t.fk_type_relance,";
-		$sql.= " t.envoi_email,";
-		$sql.= " t.textemail,";
-		$sql.= " t.sujet_email";
+		$sql.= " t.code,";
+		$sql.= " t.label,";
+		$sql.= " t.nbre_jours,";
+		$sql.= " t.description";
+
 		
         $sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
         if ($ref) $sql.= " WHERE t.ref = '".$ref."'";
-        else $sql.= " WHERE t.fk_type_relance = ".$id;
+        else $sql.= " WHERE t.rowid = ".$id;
 
     	dol_syslog(get_class($this)."::fetch");
         $resql=$this->db->query($sql);
@@ -173,12 +175,13 @@ class Relance extends CommonObject
             {
                 $obj = $this->db->fetch_object($resql);
 
-                $this->id    = $obj->fk_type_relance;
+                $this->id    = $obj->rowid;
                 
-				$this->fk_type_relance = $obj->fk_type_relance;
-				$this->envoi_email = $obj->envoi_email;
-				$this->textemail = $obj->textemail;
-                $this->sujet_email = $obj->sujet_email;
+				$this->code = $obj->code;
+				$this->label = $obj->label;
+				$this->nbre_jours = $obj->nbre_jours;
+				$this->description = $obj->description;
+
                 
             }
             $this->db->free($resql);
@@ -207,11 +210,11 @@ class Relance extends CommonObject
 
 		// Clean parameters
         
-		if (isset($this->fk_type_relance)) $this->fk_type_relance=trim($this->fk_type_relance);
-		if (isset($this->envoi_email)) $this->envoi_email=trim($this->envoi_email);
-		if (isset($this->textemail)) $this->textemail=trim($this->textemail);
-		if (isset($this->sujet_email)) $this->sujet_email=trim($this->sujet_email);
-		
+		if (isset($this->code)) $this->code=trim($this->code);
+		if (isset($this->label)) $this->label=trim($this->label);
+		if (isset($this->nbre_jours)) $this->nbre_jours=trim($this->nbre_jours);
+		if (isset($this->description)) $this->description=trim($this->description);
+
         
 
 		// Check parameters
@@ -220,13 +223,13 @@ class Relance extends CommonObject
         // Update request
         $sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET";
         
-		$sql.= " fk_type_relance=".(isset($this->fk_type_relance)?$this->fk_type_relance:"null").",";
-		$sql.= " envoi_email=".(isset($this->envoi_email)?$this->envoi_email:"null").",";
-		$sql.= " textemail=".(isset($this->textemail)?"'".$this->db->escape($this->textemail)."'":"null").",";
-		$sql.= " sujet_email=".(isset($this->sujet_email)?"'".$this->db->escape($this->sujet_email)."'":"null")."";
-		
+		$sql.= " code=".(isset($this->code)?"'".$this->db->escape($this->code)."'":"null").",";
+		$sql.= " label=".(isset($this->label)?"'".$this->db->escape($this->label)."'":"null").",";
+		$sql.= " nbre_jours=".(isset($this->nbre_jours)?$this->nbre_jours:"null").",";
+		$sql.= " description=".(isset($this->description)?"'".$this->db->escape($this->description)."'":"null")."";
+
         
-        $sql.= " WHERE fk_type_relance=".$this->id;
+        $sql.= " WHERE rowid=".$this->id;
 
 		$this->db->begin();
 
@@ -298,7 +301,7 @@ class Relance extends CommonObject
 		if (! $error)
 		{
     		$sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element;
-    		$sql.= " WHERE fk_type_relance=".$this->id;
+    		$sql.= " WHERE rowid=".$this->id;
 
     		dol_syslog(__METHOD__);
     		$resql = $this->db->query($sql);
@@ -337,7 +340,7 @@ class Relance extends CommonObject
 
 		$error=0;
 
-		$object=new Relance($this->db);
+		$object=new TexteDocument($this->db);
 
 		$this->db->begin();
 
@@ -389,21 +392,65 @@ class Relance extends CommonObject
 	{
 		$this->id=0;
 		
-		$this->fk_type_relance='';
-		$this->envoi_email='';
-		$this->textemail='';
-		$this->sujet_email='';
+		$this->code='';
+		$this->label='';
+		$this->nbre_jours='';
+		$this->description='';
 
 		
 	}
-    
-	/*
-	 * 
-	 */
-	function getLabelTypeRelance($idrelance) {
-		$typeRelance = new Crelancetype($this->db);
-		$typeRelance->fetch($this->fk_type_relance);
-		var_dump($typeRelance->nbre_jours);exit;
-		return $typeRelance->label;
+function getList()
+	{
+		$tab=array();
+
+		$sql = "SELECT c.rowid ";
+		$sql.= " FROM ".MAIN_DB_PREFIX."c_relance_type as c";
+		
+		dol_syslog(get_class($this)."::getList()", LOG_DEBUG);
+		$resql=$this->db->query($sql);
+		if ($resql)
+		{
+			$num=$this->db->num_rows($resql);
+			$i=0;
+			while ($i < $num)
+			{
+				$obj = $this->db->fetch_object($resql);
+				$relancetype=new TexteDocument($this->db);
+				$re = $relancetype->fetch($obj->rowid);
+				$tab[]=$relancetype;
+				$i++;
+			}
+			return $tab;
+		}
+		else
+		{
+			$this->error=$this->db->error();
+			return -1;
+		}
 	}
+	
+ function getMenuRelance($index ) {
+		
+		$relancetypeArr = $this->getList();
+		foreach ($relancetypeArr as $typeRelance)
+		{
+			$this->menu[$index++]=array(
+					'fk_menu'=>'fk_mainmenu=accountancy,fk_leftmenu=relance', //On utilise les ancres définis dans le menu parent déclaré au dessus
+					'type'=> 'left', // Toujours un menu gauche
+					'titre'=> $typeRelance->label,
+					'mainmenu'=> 'accountancy',
+					'leftmenu'=> '', // On n'indique rien ici car on ne souhaite pas intégrer de sous-menus à ce menu
+					'url'=> '/relance/rappel.php?late='.$typeRelance->nbre_jours,
+					'langs'=> 'relance@relance',
+					'position'=> 2021,
+					'enabled'=> '1',
+					'perms'=> '',
+					'target'=> '',
+					'user'=> 0
+			);
+		}
+		
+		
+	}
+	
 }

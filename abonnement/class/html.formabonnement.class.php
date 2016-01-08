@@ -67,12 +67,33 @@ class FormAbonnement extends Form
 		}
 		return $out;
 	}
+	function makeAbonPapier($htmlname = 'type_contact') {
+		$lesTypes = $this->type_contact_abonnement(0,'ABONPAPIER');
+		foreach($lesTypes as $key=>$value)
+		{
+			$out .= '<input type="hidden" name="type_contact" value="'.$key.'">';
+			$out .='<b>'.$value.'</b>';
+	
+		}
+		return $out;
+	}
+	function getURLContrat($id_contrat) {
+		global $db;
+		$contrat = new Contrat($db);
+		$rep =$contrat->fetch($id_contrat);
+		if($rep && count($contrat->lines)> 0) {
+		 $contratLigne = $contrat->lines[0];
+		 $produit = new Product($db);
+		 $rep =  $produit->fetch($contratLigne->fk_product);
+		 return ($rep > 0) ?$produit->url:NULL;
+		}
+	}
 	function getArrAbonneWeb($id_contrat)
 	{
 		global $langs;
-	
+
 		$tab=array();
-	
+
 		$sql = "SELECT ec.rowid, ec.statut, ec.fk_socpeople as id, ec.fk_c_type_contact";    // This field contains id of llx_socpeople or id of llx_user
 		$sql.=", t.fk_soc as socid";
 		$sql.= ", t.civility as civility, t.lastname as lastname, t.firstname, t.email";
@@ -84,12 +105,71 @@ class FormAbonnement extends Form
 		$sql.= " AND ec.fk_c_type_contact=tc.rowid";
 		$sql.= " AND tc.element='contrat'";
 		$sql.= " AND tc.source = 'external'";
-		//$sql.= " AND tc.code = 'ABONWEB'";
-		$sql.= " AND ec.fk_c_type_contact = '6000022'";
+		$sql.= " AND tc.code = 'ABONWEB'";
+		//$sql.= " AND ec.fk_c_type_contact = '6000022'";
 		$sql.= " AND tc.active=1";
 		//if ($statut >= 0) $sql.= " AND ec.statut = '".$statut."'";
 		$sql.=" ORDER BY t.lastname ASC";
-	var_dump($sql);
+		//var_dump($sql);
+		dol_syslog(get_class($this)."::liste_contact", LOG_DEBUG);
+		$resql=$this->db->query($sql);
+		if ($resql)
+		{
+			$num=$this->db->num_rows($resql);
+			$i=0;
+			while ($i < $num)
+			{
+				$obj = $this->db->fetch_object($resql);
+
+				if (! $list)
+				{
+					$transkey="TypeContact_".$obj->element."_".$obj->source."_".$obj->code;
+					$libelle_type=($langs->trans($transkey)!=$transkey ? $langs->trans($transkey) : $obj->libelle);
+					$tab[$i]=array('source'=>$obj->source,'socid'=>$obj->socid,'id'=>$obj->id,
+							'nom'=>$obj->lastname,      // For backward compatibility
+							'civility'=>$obj->civility, 'lastname'=>$obj->lastname, 'firstname'=>$obj->firstname, 'email'=>$obj->email,
+							'rowid'=>$obj->rowid,'code'=>$obj->code,'libelle'=>$libelle_type,'status'=>$obj->statut, 'fk_c_type_contact' => $obj->fk_c_type_contact);
+				}
+				else
+				{
+					$tab[$i]=$obj->id;
+				}
+
+				$i++;
+			}
+
+			return $tab;
+		}
+		else
+		{
+			$this->error=$this->db->error();
+			dol_print_error($this->db);
+			return -1;
+		}
+	}
+	
+	function getArrAbonnePapier($id_contrat)
+	{
+		global $langs;
+	
+		$tab=array();
+	
+		$sql = "SELECT ec.rowid, ec.statut, ec.nb_link,ec.fk_socpeople as id, ec.fk_c_type_contact";    // This field contains id of llx_socpeople or id of llx_user
+		$sql.=", t.fk_soc as socid";
+		$sql.= ", t.civility as civility, t.lastname as lastname, t.firstname, t.email";
+		$sql.= ", tc.source, tc.element, tc.code, tc.libelle";
+		$sql.= " FROM ".MAIN_DB_PREFIX."c_type_contact tc";
+		$sql.= ", ".MAIN_DB_PREFIX."element_contact ec";
+		$sql.=" LEFT JOIN ".MAIN_DB_PREFIX."socpeople t on ec.fk_socpeople = t.rowid";
+		$sql.= " WHERE ec.element_id =".$id_contrat;
+		$sql.= " AND ec.fk_c_type_contact=tc.rowid";
+		$sql.= " AND tc.element='contrat'";
+		$sql.= " AND tc.source = 'external'";
+		$sql.= " AND tc.code = 'ABONPAPIER'";
+		$sql.= " AND tc.active=1";
+		//if ($statut >= 0) $sql.= " AND ec.statut = '".$statut."'";
+		$sql.=" ORDER BY t.lastname ASC";
+		//var_dump($sql);
 		dol_syslog(get_class($this)."::liste_contact", LOG_DEBUG);
 		$resql=$this->db->query($sql);
 		if ($resql)
@@ -106,6 +186,7 @@ class FormAbonnement extends Form
 					$libelle_type=($langs->trans($transkey)!=$transkey ? $langs->trans($transkey) : $obj->libelle);
 					$tab[$i]=array('source'=>$obj->source,'socid'=>$obj->socid,'id'=>$obj->id,
 							'nom'=>$obj->lastname,      // For backward compatibility
+							'nb_link'=>$obj->nb_link,
 							'civility'=>$obj->civility, 'lastname'=>$obj->lastname, 'firstname'=>$obj->firstname, 'email'=>$obj->email,
 							'rowid'=>$obj->rowid,'code'=>$obj->code,'libelle'=>$libelle_type,'status'=>$obj->statut, 'fk_c_type_contact' => $obj->fk_c_type_contact);
 				}
@@ -169,7 +250,7 @@ class FormAbonnement extends Form
 		}
 	}
 
-	function envoiEmailUser($userSend,$password,$objet=null,$file=null) {
+	function envoiEmailUser($userSend,$password,$objet=null,$file=null,$urlwithroot=null) {
 		global $user,$langs,$db;
 		require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');
 		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
@@ -178,7 +259,7 @@ class FormAbonnement extends Form
 		// Get message template
 		$arraydefaultmessage=$this->getEMailTemplate($db, 'user_abonne_create', $user, $langs);
 		$mesg =$arraydefaultmessage ['content'];
-		$mesg = make_substitutions($mesg, $this->SubTemplateUser($userSend,$password));
+		$mesg = make_substitutions($mesg, $this->SubTemplateUser($userSend,$password,$urlwithroot));
 		$subject  =$arraydefaultmessage ['topic'];
 		$from = ($conf->notification->email_from)?$conf->notification->email_from:$user->email;
 		$mailfile = new CMailFile(
@@ -288,7 +369,7 @@ class FormAbonnement extends Form
 			return -1;
 		}
 	}
-	public function SubTemplateUser($userSub,$password) {
+	public function SubTemplateUser($userSub,$password,$urlwithroot=NULL) {
 		$arr= array();
 		if(is_object($userSub))
 			$arr = array(
@@ -328,7 +409,7 @@ class FormAbonnement extends Form
 		include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 		$fileparams = dol_most_recent_file($conf->commande->dir_output . '/' . $ref, preg_quote($ref, '/'));
 		$file = $fileparams ['fullname'];
-       if(is_null($fuser)) $fuser = $user;
+		if(is_null($fuser)) $fuser = $user;
 		// Define output language
 		$outputlangs = $langs;
 		$newlang = '';
@@ -353,7 +434,7 @@ class FormAbonnement extends Form
 			//
 			// 			$liste = array();
 			// 			foreach ($object->thirdparty->thirdparty_and_contact_email_array(1) as $key => $value)
-				// 				$liste [$key] = $value;
+			// 				$liste [$key] = $value;
 
 			if (dol_strlen($sendto))
 			{
@@ -424,8 +505,95 @@ class FormAbonnement extends Form
 			}
 		}
 	}
-	
-	function envoiEmailFacture($object,$login,$password,$tempmail='confirme_abon',$fuser=null) {
+	function envoiEmailCommunication($object,$papier,$communication,$fuser=null) {
+		global $user,$langs,$conf,$db;
+		require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');
+		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
+		$formmail = new FormMail($db);
+		$msgishtml=0;
+		$ref = dol_sanitizeFileName($object->ref);
+		if(is_null($fuser)) $fuser = $user;
+		// Define output language
+		$outputlangs = $langs;
+		$newlang = '';
+		if ($conf->global->MAIN_MULTILANGS && empty($newlang) && ! empty($_REQUEST['lang_id']))
+			$newlang = $_REQUEST['lang_id'];
+		if ($conf->global->MAIN_MULTILANGS && empty($newlang))
+			$newlang = $object->thirdparty->default_lang;
+
+		if (!empty($newlang))
+		{
+			$outputlangs = new Translate('', $conf);
+			$outputlangs->setDefaultLang($newlang);
+			$outputlangs->load('commercial');
+		}
+		$object->fetch_thirdparty();
+		$sendto = $object->thirdparty->email;
+		$sendto = $fuser->email;
+
+		if (dol_strlen($sendto))
+		{
+			$langs->load("commercial");
+			$from = $fuser->getFullName($langs) . ' <' . $fuser->email .'>';
+			$replyto = $from;
+				
+			$sendtobcc = $conf->global->MAIN_EMAIL_USECCC;
+			// Get message template
+			$arraydefaultmessage=$this->getEMailTemplate($db, 'abon_communication', $fuser, $langs);
+			$mesg =$arraydefaultmessage ['content'];
+			$substit ['__ORDERREF__'] = $object->ref;
+			$substit ['__ORDERID__'] = $object->id;
+			$substit ['__SIGNATURE__'] = $fuser->signature;
+			$substit ['__REFCLIENT__'] = $object->ref_client;
+			$substit ['__IDCLIENT__'] = $object->thirdparty->id;
+			$substit ['__THIRPARTY_NAME__'] = $object->thirdparty->name;
+			$substit ['__PAPIER__'] = intval($papier)==1?'OUI':'NON';
+			$substit ['__COMMUNICATION__'] = $communication;
+
+			$mesg = make_substitutions($mesg, $substit);
+			$subject  =$arraydefaultmessage ['topic'];
+			$subject = make_substitutions($subject, $substit);
+			//$topic = make_substitutions($topic, $substit);
+			// Create form object
+			
+			//$from = ($conf->notification->email_from)?$conf->notification->email_from:$fuser->email;
+			$mailfile = new CMailFile(
+					$subject,
+					$sendto,
+					$from,
+					$mesg,
+					NULL,
+					NULL,
+					NULL,
+					$sendtocc,
+					$sendtobcc,
+					NULL,
+					-1);
+
+
+
+
+
+				
+			if ($mailfile->sendfile())
+			{
+				return 1;
+			}
+			else
+			{
+				$langs->trans("errors");
+				$this->error=$langs->trans("ErrorFailedToSendPassword").' '.$mailfile->error.' send to '.$sendto.' from '.$from;
+				return -1;
+			}
+		} else
+		{
+			$langs->trans("errors");
+			$this->error=$langs->trans("ErrorFailedToSendEmail").'Email non envoyé ';
+			return -1;
+		}
+
+	}
+	function envoiEmailFacture($object,$login,$password,$tempmail='confirme_abon',$fuser=null,$refcom=null,$url=null) {
 		global $user,$langs,$conf,$db;
 		if(!is_object($object)) return -1;
 		require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');
@@ -446,7 +614,7 @@ class FormAbonnement extends Form
 			$newlang = $_REQUEST['lang_id'];
 		if ($conf->global->MAIN_MULTILANGS && empty($newlang))
 			$newlang = $object->thirdparty->default_lang;
-	
+
 		if (!empty($newlang))
 		{
 			$outputlangs = new Translate('', $conf);
@@ -470,17 +638,17 @@ class FormAbonnement extends Form
 				$langs->load("commercial");
 				$from = $fuser->getFullName($langs) . ' <' . $fuser->email .'>';
 				$replyto = $from;
-				
+
 				$sendtobcc = $conf->global->MAIN_EMAIL_USECCC;
-			if (empty($object->ref_client)) {
-			$topic = $outputlangs->transnoentities($topicmail, '__FACREF__');
-		    } else if (! empty($object->ref_client)) {
-			$topic = $outputlangs->transnoentities($topicmail, '__FACREF__ (__REFCLIENT__)');
-		    }
+				if (empty($object->ref_client)) {
+					$topic = $outputlangs->transnoentities($topicmail, '__FACREF__');
+				} else if (! empty($object->ref_client)) {
+					$topic = $outputlangs->transnoentities($topicmail, '__FACREF__ (__REFCLIENT__)');
+				}
 				// Get message template
-				$arraydefaultmessage=$this->getEMailTemplate($db, 'confirme_abon', $fuser, $langs);
+				$arraydefaultmessage=$this->getEMailTemplate($db, $tempmail, $fuser, $langs);
 				$mesg =$arraydefaultmessage ['content'];
-			
+					
 				$substit['__FACREF__'] = $object->ref;
 				$substit['__SIGNATURE__'] = $fuser->signature;
 				$substit['__REFCLIENT__'] = $object->ref_client;
@@ -491,9 +659,11 @@ class FormAbonnement extends Form
 				$substit['__LOGIN__'] = $login;
 				$substit['__PASSWORD__'] = $password;
 				$substit['__URL__'] = DOL_MAIN_URL_ROOT;
-				
-				
-	
+				$substit['__ORDERREF__'] = $refcom;
+
+
+
+
 				$mesg = make_substitutions($mesg, $substit);
 				$subject  =$arraydefaultmessage ['topic'];
 				$topic = make_substitutions($subject, $substit);
@@ -502,7 +672,7 @@ class FormAbonnement extends Form
 				$filepath = $attachedfiles['paths'];
 				$filename = $attachedfiles['names'];
 				$mimetype = $attachedfiles['mimes'];
-				
+
 				//$from = ($conf->notification->email_from)?$conf->notification->email_from:$fuser->email;
 				$mailfile = new CMailFile(
 						$topic,
@@ -516,7 +686,7 @@ class FormAbonnement extends Form
 						$sendtobcc,
 						$deliveryreceipt,
 						-1);
-	//var_dump($sendto);
+				//var_dump($sendto);
 				if ($mailfile->sendfile())
 				{
 					return 1;

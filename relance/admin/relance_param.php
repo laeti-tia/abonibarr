@@ -79,7 +79,7 @@ if($action == 'add') {
 	   		$obj->fk_type_relance = $objRelanceType->id;
 	   		$result=$obj->create($user);
 	   	}
-	   	
+	   	//var_dump($obj->errors);exit();
 	   	if ($result > 0)
 	   	{
 	   		// Creation OK
@@ -142,6 +142,14 @@ foreach ($relancetypeArr as $objRelanceType ) {
 	print '<table class="border" width="100%">';
 	print '<tr><td width="25%" valign="top"><span class="fieldrequired">'.$langs->trans("MESSAGEEMAIL").'</span><br>';
 	print '<br><i>'.$langs->trans("CommonSubstitutions").':<br>';
+	$object->substitutionarray=array('__ID__'=> 'ID',
+				'__EMAIL__' => 'EMAIL',
+				//'__LASTNAME__' => 'LASTNAME',
+				//'__FIRSTNAME__' => 'FIRSTNAME',
+				'__REFCLIENT__' => 'REFCLIENT',
+				'__FACREF__'=>'FACREF'
+			);
+		
 	foreach($object->substitutionarray as $key => $val)
 	{
 		print $key.' = '.$langs->trans($val).'<br>';

@@ -23,6 +23,10 @@ Abonnement = Abonnement
 # (where XXX is value of numeric property 'numero' of module)
 Module600001Desc = Gestion d'abonnement
 
+AbonneWeb = Abonnés web
+AbonnePapier = Abonnés papier
+ContactList = Liste des contacts
+
 #
 # Page d'administration
 #
@@ -33,19 +37,22 @@ AbonnementNbDayDefaultClosure = Nombre de jours à ajouter à la date du jour po
 AbonnementAdmVar=Administration
 AbonnementUserGroupAffect = Limiter les utilisateurs affectables à une affaire au groupe
 AbonnementAUT = Abonnement Automatique
-NBAbonnement = Nombre de relance
+NBAbonnement = Nombre de relances
 NBRE_JOURS_AVANT_RENOUVELLEMENT = Nombre de jours avant le renouvellement de l'abonnement
-NBRE_MAX_ABONNE_WEB = Nombre maximum d'abonné web
+NBRE_MAX_ABONNE_WEB = Nombre maximum d'abonnés web
 ABONListTropPercu = Facture trop perçu
 PROFIL_CLIENT = Profil par défaut du client
 PROFIL_ABONNE_WEB = Profil d'abonné web
+NBEXEMPLAIRES = Nombre  d'exemplaires
 #
 # Page À propos
 #
 About = À propos
 RelanceAbout = À propos du module relance
 RelanceAboutPage = Page à propos du module relance
-
+CONTACTOFROUTERSIMPLE = ROUTEUR EXEMPLAIRES UNIQUE
+CONTACTOFROUTERETRANGER = ROUTEUR ETRANGER
+CONTACTOFROUTERMULTI = ROUTEUR PLUSIEURS EXEMPLAIRES
 #
 # Permissions
 #
@@ -60,7 +67,8 @@ Permission1031111=Voir les affaires
 # Menu
 #
 MenuReAbonnement=Gestion Réabonnements
-AbonnementList= Renouveller
+AbonnementList= Propositions à envoyer
+REABONNEMENTATTENTE = Propositions en attente               
 AbonnementInfo = Historique 
 AbonnementCreate=Nouvel Abonnement
 AbonnementContact=Contact Abonnements
@@ -68,10 +76,10 @@ AbonnementListCurrent=Abonnements en cours
 AbonnementListMyLead=Mes Abonnements
 AbonnementListLate=Abonnements en retard
 ABON_NBRE_JOURS = Nbre Jours
-AddAbonne = Ajouter un abonné
+AddAbonne = Nouvel abonné
 AbonImportReleve = Import relevé de compte
 AbonImportReleveNouveau = Nouvel import
-
+ABONNECONTRACT = Abonnés de ce contrat
 #
 # Status
 #

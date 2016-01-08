@@ -165,7 +165,7 @@ class modRelance extends DolibarrModules
 		$this->dictionnaries=array(
 				'langs'=>'relance@relance',
 				'tabname'=>array(MAIN_DB_PREFIX."c_relance_type"),
-				'tablib'=>array("PlaceRoomDictType"),
+				'tablib'=>array("RelanceType"),
 				'tabsql'=>array('SELECT f.rowid as rowid, f.code, f.nbre_jours, f.label, f.description FROM '.MAIN_DB_PREFIX.'c_relance_type as f'),
 				'tabsqlsort'=>array("rowid ASC"),
 				'tabfield'=>array("code,label,nbre_jours"),

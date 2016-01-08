@@ -126,6 +126,9 @@ $thirdparty_fields= array(
 		'livr_country' => array('name'=>'livr_country','type'=>'xsd:string'),
 		'contactname' => array('name'=>'contactname','type'=>'xsd:string'),
 		'contactfirstname' => array('name'=>'contactfirstname','type'=>'xsd:string'),
+		'communication' => array('name'=>'communication','type'=>'xsd:string'),
+		'docpapier' => array('name'=>'docpapier','type'=>'xsd:string'),
+		'isnewletter' => array('name'=>'isnewletter','type'=>'xsd:string'),
 		
 		);
 
@@ -459,8 +462,8 @@ function createThirdParty($authentication,$thirdparty,$idCmd=null)
         $extralabels=$extrafields->fetch_name_optionals_label('societe',true);
         foreach($extrafields->attribute_label as $key=>$label)
         {
-        	$key='options_'.$key;
-        	$newobject->array_options[$key]=isset($thirdparty[$key])?$thirdparty[$key]:null;
+        	$key1='options_'.$key;
+        	$newobject->array_options[$key1]=isset($thirdparty[$key])?$thirdparty[$key]:null;
         }
 
         $db->begin();
@@ -475,9 +478,10 @@ function createThirdParty($authentication,$thirdparty,$idCmd=null)
         {
             $error++;
         }
-        
+        $newobject->update_note_public( $newobject->note_public);
+       
        // if($thirdparty['firstname']!=$thirdparty['contactfirstname'] && $thirdparty['lastname']!=$thirdparty['contactname'])
-        if($thirdparty['address']!=$thirdparty['livr_adress'] ) {
+        if((($thirdparty['address']!=$thirdparty['livr_adress']) && $newobject->particulier) || (!$newobject->particulier)) {
         	$contact = new Contact($db);
         	$contact->lastname = $thirdparty['contactname'];
         	$contact->firstname = $thirdparty['contactfirstname'];
@@ -486,6 +490,7 @@ function createThirdParty($authentication,$thirdparty,$idCmd=null)
         	$contact->zip = $thirdparty['livr_zip'];
         	$contact->town = $thirdparty['livr_town'];
         	$contact->country_id = $thirdparty['livr_country'];
+        	$contact->email = $newobject->email;
         	$result= $contact->create($fuser);
         	if ($result <= 0)
         	{
@@ -521,15 +526,21 @@ function createThirdParty($authentication,$thirdparty,$idCmd=null)
         $note = $abonne->updateExtrafieldsCommandeCommStruture($commande);
        // $commande->note_public = 'Communication structurée : '.$note;
         $commande->update_note_public('Communication structurée : '.$note);
+        $commande->update_note($thirdparty['communication'],'_private');
         $formabonne->genereDocument($commande);
         
         if(is_object($commande)) {
         	$resultcmd = $formabonne->envoiEmailCommande($commande,'',$fuser);
+        	//envoiEmailCommunication
         	if ($resultcmd <= 0)
         	{
         		$error++;
         		$erCommande = $formabonne->error;
         	}
+        	$newobject->note_public = trim($newobject->note_public);
+        	if((isset($thirdparty['docpapier'])&& !is_null($thirdparty['docpapier'])&& $thirdparty['docpapier']!='') || 
+        			(!is_null($newobject->note_public)&& $newobject->note_public!=''))
+        	$formabonne->envoiEmailCommunication($commande, $thirdparty['docpapier'],$newobject->note_public,$fuser);
         }
         
 
