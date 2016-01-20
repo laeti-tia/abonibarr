@@ -44,13 +44,16 @@ ABONListTropPercu = Facture trop perçu
 PROFIL_CLIENT = Profil par défaut du client
 PROFIL_ABONNE_WEB = Profil d'abonné web
 NBEXEMPLAIRES = Nombre  d'exemplaires
+SITE = Revue
+SITEID = ID revue
+
 #
 # Page À propos
 #
 About = À propos
 RelanceAbout = À propos du module relance
 RelanceAboutPage = Page à propos du module relance
-CONTACTOFROUTERSIMPLE = ROUTEUR EXEMPLAIRES UNIQUE
+CONTACTOFROUTERSIMPLE = ROUTEUR EXEMPLAIRES UNIQUES
 CONTACTOFROUTERETRANGER = ROUTEUR ETRANGER
 CONTACTOFROUTERMULTI = ROUTEUR PLUSIEURS EXEMPLAIRES
 #
@@ -77,9 +80,10 @@ AbonnementListMyLead=Mes Abonnements
 AbonnementListLate=Abonnements en retard
 ABON_NBRE_JOURS = Nbre Jours
 AddAbonne = Nouvel abonné
-AbonImportReleve = Import relevé de compte
+AbonImportReleve = Relevé bancaire ING(CSV)
 AbonImportReleveNouveau = Nouvel import
 ABONNECONTRACT = Abonnés de ce contrat
+TexteDocument = Texte des factures et commandes
 #
 # Status
 #

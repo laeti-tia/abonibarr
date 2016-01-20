@@ -397,9 +397,10 @@ class Abonnement
 			//$commande = $this->createInvoiceFromContact($contrat);
 			// creation de la commande
 			$commande = $this->createCommandeFromContrat($contrat);
-				
+			
 			//ici
 			if($commande){
+				$contrat->cloture($user);
 				$this->updateExtrafieldsContrat($contrat, array('prop_renouv'=>1));
 				$outputlangs = $langs;
 				$newlang = '';
@@ -871,5 +872,7 @@ class Abonnement
 			}
 		}
 	}
+	
+	
 
 }

@@ -162,18 +162,18 @@ class modRelance extends DolibarrModules
 			$conf->relance->enabled=0;
 		}
 		$this->dictionaries=array();
-		$this->dictionnaries=array(
-				'langs'=>'relance@relance',
-				'tabname'=>array(MAIN_DB_PREFIX."c_relance_type"),
-				'tablib'=>array("RelanceType"),
-				'tabsql'=>array('SELECT f.rowid as rowid, f.code, f.nbre_jours, f.label, f.description FROM '.MAIN_DB_PREFIX.'c_relance_type as f'),
-				'tabsqlsort'=>array("rowid ASC"),
-				'tabfield'=>array("code,label,nbre_jours"),
-				'tabfieldvalue'=>array("code,label,nbre_jours"),
-				'tabfieldinsert'=>array("code,label,nbre_jours"),
-				'tabrowid'=>array("rowid"),
-				'tabcond'=>array($conf->relance->enabled)
-		);
+// 		$this->dictionnaries=array(
+// 				'langs'=>'relance@relance',
+// 				'tabname'=>array(MAIN_DB_PREFIX."c_relance_type"),
+// 				'tablib'=>array("RelanceType"),
+// 				'tabsql'=>array('SELECT f.rowid as rowid, f.code, f.nbre_jours, f.label, f.description FROM '.MAIN_DB_PREFIX.'c_relance_type as f'),
+// 				'tabsqlsort'=>array("rowid ASC"),
+// 				'tabfield'=>array("code,label,nbre_jours"),
+// 				'tabfieldvalue'=>array("code,label,nbre_jours"),
+// 				'tabfieldinsert'=>array("code,label,nbre_jours"),
+// 				'tabrowid'=>array("rowid"),
+// 				'tabcond'=>array($conf->relance->enabled)
+// 		);
 		/* Example:
 		 if (! isset($conf->relance->enabled)) $conf->relance->enabled=0;	// This is to avoid warnings
 		$this->dictionaries=array(

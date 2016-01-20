@@ -502,8 +502,19 @@ class modAbonnement extends DolibarrModules
 		$this->export_label[$r]='CONTACTPAPERCONTRACT';	// Translation key (used only if key ExportDataset_xxx_z not found)
 		$this->export_enabled[$r]='1';                               // Condition to show export in list (ie: '$user->id==3'). Set to 1 to always show when module is enabled.
 		//$this->export_permission[$r]=array(array("contrat","contrat","export"));
-		$this->export_fields_array[$r]=array('s.rowid'=>"IdCompany",'s.nom'=>"CompanyName",'s.status'=>"Status",'s.code_client'=>"CustomerCode",'d.nom'=>'State','co.label'=>"Country",'co.code'=>"CountryCode",'t.rowid'=>"IdContact",'t.lastname'=>'LastName','t.firstname'=>'FirstName','t.address'=>'Address','t.zip'=>'Zip','t.town'=>'Town','t.fk_pays'=>'Country','t.phone'=>'Phone','c.rowid'=>"ContractId",'c.datec'=>"ContractDateCreation",'c.statut'=>'ContractStatus','cd.rowid'=>'LineId','cd.description'=>"LineDescription",'cd.date_ouverture'=>"DateStart",'cd.date_fin_validite'=>"DateEnd",'cd.fk_product'=>'ProductId','p.ref'=>'ProductRef');
-		$this->export_entities_array[$r]=array('s.rowid'=>"company",'s.nom'=>"company",'s.status'=>"company",'s.code_client'=>"company",'d.nom'=>'contact','co.label'=>"contact",'co.code'=>"contact",'t.rowid'=>"contact",'t.lastname'=>'contact','t.firstname'=>'contact','t.address'=>'contact','t.zip'=>'contact','t.town'=>'contact','t.fk_pays'=>'contact','t.phone'=>'contact','c.rowid'=>"contract",'c.datec'=>"contract",'c.statut'=>'contract','cd.rowid'=>'contract_line','cd.description'=>"contract_line",'cd.date_ouverture'=>"contract_line",'cd.date_fin_validite'=>"contract_line",'cd.fk_product'=>'service','p.ref'=>'service');
+		$this->export_fields_array[$r]=array('s.rowid'=>"IdCompany",'s.nom'=>"CompanyName",'s.status'=>"Status",'s.code_client'=>"CustomerCode",'d.nom'=>'State','co.label'=>"Country",'co.code'=>"CountryCode",'t.rowid'=>"IdContact",'t.lastname'=>'LastName','t.firstname'=>'FirstName','t.address'=>'Address','t.zip'=>'Zip','t.town'=>'Town','t.fk_pays'=>'Country','t.phone'=>'Phone','c.rowid'=>"ContractId",'c.datec'=>"ContractDateCreation",'c.statut'=>'ContractStatus','cd.rowid'=>'LineId','cd.description'=>"LineDescription",'cd.date_ouverture'=>"DateStart",'cd.date_fin_validite'=>"DateEnd",'cd.fk_product'=>'ProductId','p.ref'=>'ProductRef','fk_categorie'=>'SITEID','ca.label'=>'SITE');
+		$this->export_entities_array[$r]=array('s.rowid'=>"company",'s.nom'=>"company",'s.status'=>"company",'s.code_client'=>"company",'d.nom'=>'contact','co.label'=>"contact",'co.code'=>"contact",'t.rowid'=>"contact",'t.lastname'=>'contact','t.firstname'=>'contact','t.address'=>'contact','t.zip'=>'contact','t.town'=>'contact','t.fk_pays'=>'contact','t.phone'=>'contact','c.rowid'=>"contract",'c.datec'=>"contract",'c.statut'=>'contract','cd.rowid'=>'contract_line','cd.description'=>"contract_line",'cd.date_ouverture'=>"contract_line",'cd.date_fin_validite'=>"contract_line",'cd.fk_product'=>'service','p.ref'=>'service','fk_categorie'=>'service','ca.label'=>'service');
+		
+		$this->export_TypeFields_array[$r]=array('s.rowid'=>"List:societe:nom",'s.nom'=>'Text','s.address'=>'Text','s.zip'=>'Text','s.town'=>'Text','co.code'=>'Text',
+				's.phone'=>'Text','s.siren'=>'Text','s.siret'=>'Text','s.ape'=>'Text','s.idprof4'=>'Text','s.code_compta'=>'Text',
+				's.tva_intra'=>'Text','tc.code'=>'Text',
+				'c.ref'=>"Text",'c.datec'=>"Date",'c.date_contrat'=>"Date",'c.mise_en_service'=>"Date",
+				'c.fin_validite'=>"Date",'c.date_cloture'=>"Date",'c.note_private'=>"Text",'c.note_public'=>"Text",
+				'cd.label'=>"Text",'cd.description'=>"Text",'cd.price_ht'=>"Numeric",'cd.tva_tx'=>"Numeric",
+				'cd.qty'=>"Numeric",'cd.total_ht'=>"Numeric",'cd.total_tva'=>"Numeric",'cd.total_ttc'=>"Numeric",
+				'cd.date_ouverture'=>"Date",'cd.date_ouverture_prevue'=>"Date",'cd.date_fin_validite'=>"Date",'cd.date_cloture'=>"Date",
+				'fk_categorie'=>'List:categorie:label','p.rowid'=>'List:Product:label','p.ref'=>'Text','p.label'=>'Text');
+		
 		$this->export_sql_start[$r]='SELECT  ';
 		$this->export_sql_end[$r] .=' FROM	'.MAIN_DB_PREFIX.'c_type_contact tc,'.MAIN_DB_PREFIX.'element_contact ec ,'.MAIN_DB_PREFIX.'contrat AS c ';
 		
@@ -515,6 +526,8 @@ class modAbonnement extends DolibarrModules
 		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'c_country as co ON t.fk_pays = co.rowid';
 		
 		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'product AS p ON p.rowid = cd.fk_product';
+		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON p.rowid = cp.fk_product';
+		
 		$this->export_sql_end[$r] .=" WHERE  ec.element_id= c.rowid AND    ec.fk_socpeople = t.rowid
 		AND  ec.fk_c_type_contact=tc.rowid AND tc.element='contrat'
 		AND tc.source = 'external'
@@ -528,9 +541,9 @@ class modAbonnement extends DolibarrModules
 		$this->export_enabled[$r]='1';                               // Condition to show export in list (ie: '$user->id==3'). Set to 1 to always show when module is enabled.
 		//$this->export_permission[$r]=array(array("contrat","contrat","export"));
 		$this->export_fields_array[$r]=array('s.rowid'=>"IdCompany",'s.nom'=>"CompanyName",'s.status'=>"Status",'s.code_client'=>"CustomerCode",'d.nom'=>'State','co.label'=>"Country",'co.code'=>"CountryCode",'t.rowid'=>"IdContact",'t.lastname'=>'LastName','t.firstname'=>'FirstName','t.address'=>'Address','t.zip'=>'Zip','t.town'=>'Town','t.fk_pays'=>'Country','t.phone'=>'Phone','tc.code'=>'typeContact','c.rowid'=>"contractId",'c.ref'=>"contactRef",'c.datec'=>"contractDateCreation",'c.date_contrat'=>"DateContract",'c.mise_en_service'=>"DateMiseService",'c.statut'=>'ContractStatus','c.fin_validite'=>"EndValidity",'c.date_cloture'=>"Cloture",'c.note_private'=>"NotePrivate",'c.note_public'=>"NotePublic",
-				'cd.rowid'=>'LineId','cd.label'=>"LineLabel",'cd.description'=>"LineDescription",'cd.date_ouverture'=>"DateStart",'cd.date_fin_validite'=>"DateEnd",'cd.fk_product'=>'ProductId','p.ref'=>'ProductRef');
+				'cd.rowid'=>'LineId','cd.label'=>"LineLabel",'cd.description'=>"LineDescription",'cd.date_ouverture'=>"DateStart",'cd.date_fin_validite'=>"DateEnd",'cd.fk_product'=>'ProductId','p.ref'=>'ProductRef','fk_categorie'=>'SITEID','ca.label'=>'SITE');
 		$this->export_entities_array[$r]=array('s.rowid'=>"company",'s.nom'=>"company",'s.status'=>"company",'s.code_client'=>"company",'d.nom'=>'contact','co.label'=>"contact",'co.code'=>"contact",'t.rowid'=>"contact",'t.lastname'=>'contact','t.firstname'=>'contact','t.address'=>'contact','t.zip'=>'contact','t.town'=>'contact','t.fk_pays'=>'contact','t.phone'=>'contact','tc.code'=>'contact','c.rowid'=>"contract",'c.ref'=>"contract",'c.datec'=>"contract",'c.date_contrat'=>"contract",'c.mise_en_service'=>"contract",'c.statut'=>'contract','c.fin_validite'=>"contract",'c.date_cloture'=>"contract",'c.note_private'=>"contract",'c.note_public'=>"contract"
-				,'cd.rowid'=>'contract_line','cd.label'=>"contract_line",'cd.description'=>"contract_line",'cd.date_ouverture'=>"contract_line",'cd.date_fin_validite'=>"contract_line",'cd.fk_product'=>'service','p.ref'=>'service');
+				,'cd.rowid'=>'contract_line','cd.label'=>"contract_line",'cd.description'=>"contract_line",'cd.date_ouverture'=>"contract_line",'cd.date_fin_validite'=>"contract_line",'cd.fk_product'=>'service','p.ref'=>'service','fk_categorie'=>'SITE','ca.label'=>'SITE');
 		
 		$this->export_TypeFields_array[$r]=array('s.rowid'=>"List:societe:nom",'s.nom'=>'Text','s.address'=>'Text','s.zip'=>'Text','s.town'=>'Text','co.code'=>'Text',
 				's.phone'=>'Text','s.siren'=>'Text','s.siret'=>'Text','s.ape'=>'Text','s.idprof4'=>'Text','s.code_compta'=>'Text',
@@ -540,7 +553,7 @@ class modAbonnement extends DolibarrModules
 				'cd.label'=>"Text",'cd.description'=>"Text",'cd.price_ht'=>"Numeric",'cd.tva_tx'=>"Numeric",
 				'cd.qty'=>"Numeric",'cd.total_ht'=>"Numeric",'cd.total_tva'=>"Numeric",'cd.total_ttc'=>"Numeric",
 				'cd.date_ouverture'=>"Date",'cd.date_ouverture_prevue'=>"Date",'cd.date_fin_validite'=>"Date",'cd.date_cloture'=>"Date",
-				'p.rowid'=>'List:Product:label','p.ref'=>'Text','p.label'=>'Text');
+				'fk_categorie'=>'List:categorie:label','p.rowid'=>'List:Product:label','p.ref'=>'Text','p.label'=>'Text');
 		
 		$this->export_sql_start[$r]='SELECT  ';
 		$this->export_sql_end[$r] .=' FROM	'.MAIN_DB_PREFIX.'c_type_contact tc,'.MAIN_DB_PREFIX.'element_contact ec ,'.MAIN_DB_PREFIX.'contrat AS c ';
@@ -553,6 +566,9 @@ class modAbonnement extends DolibarrModules
 		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'c_country as co ON t.fk_pays = co.rowid';
 		
 		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'product AS p ON p.rowid = cd.fk_product';
+		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON (p.rowid = cp.fk_product )';
+		$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'categorie as ca ON (ca.rowid = cp.fk_categorie )';
+		
 		$this->export_sql_end[$r] .=" WHERE  ec.element_id= c.rowid AND    ec.fk_socpeople = t.rowid
 		AND  ec.fk_c_type_contact=tc.rowid AND tc.element='contrat'
 		AND tc.source = 'external'
@@ -612,13 +628,13 @@ class modAbonnement extends DolibarrModules
 				$this->export_label[$r]='CONTACTOFROUTERMULTI';	// Translation key (used only if key ExportDataset_xxx_z not found)
 				$this->export_enabled[$r]='1';                               // Condition to show export in list (ie: '$user->id==3'). Set to 1 to always show when module is enabled.
 				//$this->export_permission[$r]=array(array("contrat","contrat","export"));
-				$this->export_fields_array[$r]=array('s.nom'=>"CompanyName",'CONCAT(t.firstname,t.lastname) as firstname'=>'FirstName',
+				$this->export_fields_array[$r]=array('s.nom'=>"CompanyName",'t.firstname'=>'FirstName','t.lastname'=>'LastName',
 						't.address'=>'Address','s.rowid'=>"IdCompany",'t.zip'=>'Zip','t.town'=>'Town','nb_link as nombre'=>'Nombre',
 						's.code_client'=>"CustomerCode",'d.nom'=>'State',
 						'co.label'=>"Country",'co.code'=>"CountryCode",
 						't.address'=>'Address','t.zip'=>'Zip',
-						't.town'=>'Town','t.phone'=>'Phone'	);
-				$this->export_entities_array[$r]=array('s.rowid'=>"company",'s.nom'=>"company",'s.status'=>"company",'s.code_client'=>"company",'d.nom'=>'contact','co.label'=>"contact",'co.code'=>"contact",'t.rowid'=>"contact",'t.lastname'=>'contact','CONCAT(t.firstname,t.lastname) as firstname'=>'contact','t.address'=>'contact','t.zip'=>'contact','t.town'=>'contact','t.fk_pays'=>'contact','t.phone'=>'contact','tc.code'=>'contact','c.rowid'=>"contract",'c.ref'=>"contract",'c.datec'=>"contract",'c.date_contrat'=>"contract",'c.mise_en_service'=>"contract",'c.statut'=>'contract','c.fin_validite'=>"contract",'c.date_cloture'=>"contract",'c.note_private'=>"contract",'c.note_public'=>"contract"
+						't.town'=>'Town','t.phone'=>'Phone','fk_categorie'=>'SITEID','ca.label'=>'SITE'	);
+				$this->export_entities_array[$r]=array('s.rowid'=>"company",'s.nom'=>"company",'s.status'=>"company",'s.code_client'=>"company",'d.nom'=>'contact','co.label'=>"contact",'co.code'=>"contact",'t.rowid'=>"contact",'t.lastname'=>'contact','t.firstname'=>'contact','t.address'=>'contact','t.zip'=>'contact','t.town'=>'contact','t.fk_pays'=>'contact','t.phone'=>'contact','tc.code'=>'contact','c.rowid'=>"contract",'c.ref'=>"contract",'c.datec'=>"contract",'c.date_contrat'=>"contract",'c.mise_en_service'=>"contract",'c.statut'=>'contract','c.fin_validite'=>"contract",'c.date_cloture'=>"contract",'c.note_private'=>"contract",'c.note_public'=>"contract"
 								,'cd.rowid'=>'contract_line','cd.label'=>"contract_line",'count( t.rowid) as nombre'=>'contract_line','cd.description'=>"contract_line",'cd.date_ouverture'=>"contract_line",'cd.date_fin_validite'=>"contract_line",'cd.fk_product'=>'service','p.ref'=>'service');
 		
 				$this->export_TypeFields_array[$r]=array('s.rowid'=>"List:societe:nom",'s.nom'=>'Text','s.address'=>'Text','s.zip'=>'Text','s.town'=>'Text','co.code'=>'Text',
@@ -629,7 +645,7 @@ class modAbonnement extends DolibarrModules
 								'cd.label'=>"Text",'cd.description'=>"Text",'cd.price_ht'=>"Numeric",'cd.tva_tx'=>"Numeric",
 								'cd.qty'=>"Numeric",'cd.total_ht'=>"Numeric",'cd.total_tva'=>"Numeric",'cd.total_ttc'=>"Numeric",
 								'cd.date_ouverture'=>"Date",'cd.date_ouverture_prevue'=>"Date",'cd.date_fin_validite'=>"Date",'cd.date_cloture'=>"Date",
-								'p.rowid'=>'List:Product:label','p.ref'=>'Text','p.label'=>'Text');
+								'fk_categorie'=>'List:categorie:label','p.rowid'=>'List:Product:label','p.ref'=>'Text','p.label'=>'Text');
 				 
 				$this->export_sql_start[$r]='SELECT  ';
 				$this->export_sql_end[$r] .=' FROM	'.MAIN_DB_PREFIX.'c_type_contact tc,'.MAIN_DB_PREFIX.'element_contact ec ,'.MAIN_DB_PREFIX.'contrat AS c ';
@@ -642,6 +658,9 @@ class modAbonnement extends DolibarrModules
 				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'c_country as co ON t.fk_pays = co.rowid ';
 		
 				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'product AS p ON p.rowid = cd.fk_product ';
+				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON p.rowid = cp.fk_product';
+				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'categorie as ca ON (ca.rowid = cp.fk_categorie )';
+				
 				$this->export_sql_end[$r] .="  WHERE ec.element_id= c.rowid AND ec.fk_socpeople = t.rowid
 											   AND ec.fk_c_type_contact=tc.rowid AND tc.element='contrat' 
 											   AND tc.source = 'external' AND tc.code like'ABONPAPIER%' 
@@ -654,13 +673,13 @@ class modAbonnement extends DolibarrModules
 				$this->export_label[$r]='CONTACTOFROUTERSIMPLE';	// Translation key (used only if key ExportDataset_xxx_z not found)
 				$this->export_enabled[$r]='1';                               // Condition to show export in list (ie: '$user->id==3'). Set to 1 to always show when module is enabled.
 				//$this->export_permission[$r]=array(array("contrat","contrat","export"));
-				$this->export_fields_array[$r]=array('s.nom'=>"CompanyName",'CONCAT(t.firstname,t.lastname) as firstname'=>'FirstName',
-						't.address'=>'Address','s.rowid'=>"IdCompany",'t.zip'=>'Zip','t.town'=>'Town','count( t.rowid) as nombre'=>'Nombre',
+				$this->export_fields_array[$r]=array('s.nom'=>"CompanyName",'t.firstname'=>'FirstName','t.lastname'=>'LastName',
+						't.address'=>'Address','s.rowid'=>"IdCompany",'t.zip'=>'Zip','t.town'=>'Town',' nb_link as nombre'=>'Nombre',
 						's.code_client'=>"CustomerCode",'d.nom'=>'State',
 						'co.label'=>"Country",'co.code'=>"CountryCode",
 						't.address'=>'Address','t.zip'=>'Zip',
-						't.town'=>'Town','t.phone'=>'Phone'	);
-				$this->export_entities_array[$r]=array('s.rowid'=>"company",'s.nom'=>"company",'s.status'=>"company",'s.code_client'=>"company",'d.nom'=>'contact','co.label'=>"contact",'co.code'=>"contact",'t.rowid'=>"contact",'t.lastname'=>'contact','CONCAT(t.firstname,t.lastname) as firstname'=>'contact','t.address'=>'contact','t.zip'=>'contact','t.town'=>'contact','t.fk_pays'=>'contact','t.phone'=>'contact','tc.code'=>'contact','c.rowid'=>"contract",'c.ref'=>"contract",'c.datec'=>"contract",'c.date_contrat'=>"contract",'c.mise_en_service'=>"contract",'c.statut'=>'contract','c.fin_validite'=>"contract",'c.date_cloture'=>"contract",'c.note_private'=>"contract",'c.note_public'=>"contract"
+						't.town'=>'Town','t.phone'=>'Phone','fk_categorie'=>'SITEID','ca.label'=>'SITE'	);
+				$this->export_entities_array[$r]=array('s.rowid'=>"company",'s.nom'=>"company",'s.status'=>"company",'s.code_client'=>"company",'d.nom'=>'contact','co.label'=>"contact",'co.code'=>"contact",'t.rowid'=>"contact",'t.lastname'=>'contact','t.firstname'=>'contact','t.address'=>'contact','t.zip'=>'contact','t.town'=>'contact','t.fk_pays'=>'contact','t.phone'=>'contact','tc.code'=>'contact','c.rowid'=>"contract",'c.ref'=>"contract",'c.datec'=>"contract",'c.date_contrat'=>"contract",'c.mise_en_service'=>"contract",'c.statut'=>'contract','c.fin_validite'=>"contract",'c.date_cloture'=>"contract",'c.note_private'=>"contract",'c.note_public'=>"contract"
 						,'cd.rowid'=>'contract_line','cd.label'=>"contract_line",'nb_link as nombre'=>'contract_line','cd.description'=>"contract_line",'cd.date_ouverture'=>"contract_line",'cd.date_fin_validite'=>"contract_line",'cd.fk_product'=>'service','p.ref'=>'service');
 				
 				$this->export_TypeFields_array[$r]=array('s.rowid'=>"List:societe:nom",'s.nom'=>'Text','s.address'=>'Text','s.zip'=>'Text','s.town'=>'Text','co.code'=>'Text',
@@ -671,7 +690,7 @@ class modAbonnement extends DolibarrModules
 						'cd.label'=>"Text",'cd.description'=>"Text",'cd.price_ht'=>"Numeric",'cd.tva_tx'=>"Numeric",
 						'cd.qty'=>"Numeric",'cd.total_ht'=>"Numeric",'cd.total_tva'=>"Numeric",'cd.total_ttc'=>"Numeric",
 						'cd.date_ouverture'=>"Date",'cd.date_ouverture_prevue'=>"Date",'cd.date_fin_validite'=>"Date",'cd.date_cloture'=>"Date",
-						'p.rowid'=>'List:Product:label','p.ref'=>'Text','p.label'=>'Text');
+						'fk_categorie'=>'List:categorie:label','p.rowid'=>'List:Product:label','p.ref'=>'Text','p.label'=>'Text');
 					
 				$this->export_sql_start[$r]='SELECT  ';
 				$this->export_sql_end[$r] .=' FROM	'.MAIN_DB_PREFIX.'c_type_contact tc,'.MAIN_DB_PREFIX.'element_contact ec ,'.MAIN_DB_PREFIX.'contrat AS c ';
@@ -684,6 +703,9 @@ class modAbonnement extends DolibarrModules
 				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'c_country as co ON t.fk_pays = co.rowid ';
 				
 				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'product AS p ON p.rowid = cd.fk_product ';
+				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON p.rowid = cp.fk_product';
+				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'categorie as ca ON (ca.rowid = cp.fk_categorie )';
+				
 				$this->export_sql_end[$r] .="  WHERE ec.element_id= c.rowid AND ec.fk_socpeople = t.rowid
 				AND ec.fk_c_type_contact=tc.rowid AND tc.element='contrat'
 				AND tc.source = 'external' AND tc.code like'ABONPAPIER%'
@@ -697,14 +719,14 @@ class modAbonnement extends DolibarrModules
 				$this->export_label[$r]='CONTACTOFROUTERETRANGER';	// Translation key (used only if key ExportDataset_xxx_z not found)
 				$this->export_enabled[$r]='1';                               // Condition to show export in list (ie: '$user->id==3'). Set to 1 to always show when module is enabled.
 				//$this->export_permission[$r]=array(array("contrat","contrat","export"));
-				$this->export_fields_array[$r]=array('s.nom'=>"CompanyName",'CONCAT(t.firstname,t.lastname) as firstname'=>'FirstName',
+				$this->export_fields_array[$r]=array('s.nom'=>"CompanyName",'t.firstname'=>'FirstName','t.lastname'=>'LastName',
 						't.address'=>'Address','s.rowid'=>"IdCompany",'t.zip'=>'Zip','t.town'=>'Town',
 						's.code_client'=>"CustomerCode",'d.nom'=>'State',
 						'co.label'=>"Country",'co.code'=>"CountryCode",
 						't.address'=>'Address','t.zip'=>'Zip',
-						't.town'=>'Town','t.phone'=>'Phone'	);
-				$this->export_entities_array[$r]=array('s.rowid'=>"company",'s.nom'=>"company",'s.status'=>"company",'s.code_client'=>"company",'d.nom'=>'contact','co.label'=>"contact",'co.code'=>"contact",'t.rowid'=>"contact",'t.lastname'=>'contact','CONCAT(t.firstname,t.lastname) as firstname'=>'contact','t.address'=>'contact','t.zip'=>'contact','t.town'=>'contact','t.fk_pays'=>'contact','t.phone'=>'contact','tc.code'=>'contact','c.rowid'=>"contract",'c.ref'=>"contract",'c.datec'=>"contract",'c.date_contrat'=>"contract",'c.mise_en_service'=>"contract",'c.statut'=>'contract','c.fin_validite'=>"contract",'c.date_cloture'=>"contract",'c.note_private'=>"contract",'c.note_public'=>"contract"
-						,'cd.rowid'=>'contract_line','cd.label'=>"contract_line",'count( t.rowid) as nombre'=>'contract_line','cd.description'=>"contract_line",'cd.date_ouverture'=>"contract_line",'cd.date_fin_validite'=>"contract_line",'cd.fk_product'=>'service','p.ref'=>'service');
+						't.town'=>'Town','t.phone'=>'Phone','fk_categorie'=>'SITEID','ca.label'=>'SITE'	);
+				$this->export_entities_array[$r]=array('s.rowid'=>"company",'s.nom'=>"company",'s.status'=>"company",'s.code_client'=>"company",'d.nom'=>'contact','co.label'=>"contact",'co.code'=>"contact",'t.rowid'=>"contact",'t.lastname'=>'contact','t.firstname'=>'contact','t.address'=>'contact','t.zip'=>'contact','t.town'=>'contact','t.fk_pays'=>'contact','t.phone'=>'contact','tc.code'=>'contact','c.rowid'=>"contract",'c.ref'=>"contract",'c.datec'=>"contract",'c.date_contrat'=>"contract",'c.mise_en_service'=>"contract",'c.statut'=>'contract','c.fin_validite'=>"contract",'c.date_cloture'=>"contract",'c.note_private'=>"contract",'c.note_public'=>"contract"
+						,'cd.rowid'=>'contract_line','cd.label'=>"contract_line",' nb_link as nombre'=>'contract_line','cd.description'=>"contract_line",'cd.date_ouverture'=>"contract_line",'cd.date_fin_validite'=>"contract_line",'cd.fk_product'=>'service','p.ref'=>'service');
 				
 				$this->export_TypeFields_array[$r]=array('s.rowid'=>"List:societe:nom",'s.nom'=>'Text','s.address'=>'Text','s.zip'=>'Text','s.town'=>'Text','co.code'=>'Text',
 						's.phone'=>'Text','s.siren'=>'Text','s.siret'=>'Text','s.ape'=>'Text','s.idprof4'=>'Text','s.code_compta'=>'Text',
@@ -714,7 +736,7 @@ class modAbonnement extends DolibarrModules
 						'cd.label'=>"Text",'cd.description'=>"Text",'cd.price_ht'=>"Numeric",'cd.tva_tx'=>"Numeric",
 						'cd.qty'=>"Numeric",'cd.total_ht'=>"Numeric",'cd.total_tva'=>"Numeric",'cd.total_ttc'=>"Numeric",
 						'cd.date_ouverture'=>"Date",'cd.date_ouverture_prevue'=>"Date",'cd.date_fin_validite'=>"Date",'cd.date_cloture'=>"Date",
-						'p.rowid'=>'List:Product:label','p.ref'=>'Text','p.label'=>'Text');
+						'fk_categorie'=>'List:categorie:label','p.rowid'=>'List:Product:label','p.ref'=>'Text','p.label'=>'Text');
 					
 				$this->export_sql_start[$r]='SELECT  ';
 				$this->export_sql_end[$r] .=' FROM	'.MAIN_DB_PREFIX.'c_type_contact tc,'.MAIN_DB_PREFIX.'element_contact ec ,'.MAIN_DB_PREFIX.'contrat AS c ';
@@ -727,6 +749,9 @@ class modAbonnement extends DolibarrModules
 				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'c_country as co ON t.fk_pays = co.rowid ';
 				
 				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'product AS p ON p.rowid = cd.fk_product ';
+				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON p.rowid = cp.fk_product';
+				$this->export_sql_end[$r] .=' LEFT JOIN '.MAIN_DB_PREFIX.'categorie as ca ON (ca.rowid = cp.fk_categorie )';
+				
 				$this->export_sql_end[$r] .="  WHERE ec.element_id= c.rowid AND ec.fk_socpeople = t.rowid
 				AND ec.fk_c_type_contact=tc.rowid AND tc.element='contrat'
 				AND tc.source = 'external' AND tc.code like'ABONPAPIER%'
