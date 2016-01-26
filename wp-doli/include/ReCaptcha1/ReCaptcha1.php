@@ -24,12 +24,12 @@
  * THE SOFTWARE.
  */
 
-namespace ReCaptcha;
+namespace ReCaptcha1;
 
 /**
  * reCAPTCHA client.
  */
-class ReCaptcha
+class ReCaptcha1
 {
     /**
      * Version of this client library.
@@ -70,7 +70,7 @@ class ReCaptcha
         if (!is_null($requestMethod)) {
             $this->requestMethod = $requestMethod;
         } else {
-            $this->requestMethod = new RequestMethod\Post();
+            $this->requestMethod = new RequestMethod\Curl();
         }
     }
 
@@ -91,9 +91,7 @@ class ReCaptcha
         }
 
         $params = new RequestParameters($this->secret, $response, $remoteIp, self::VERSION);
-        var_dump($params);
         $rawResponse = $this->requestMethod->submit($params);
-        var_dump($rawResponse);
         return Response::fromJson($rawResponse);
     }
 }
