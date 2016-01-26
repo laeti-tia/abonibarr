@@ -79,7 +79,7 @@ Class Wpdoli {
 	}
 	public function add_admin_menu()
 	{
-		add_menu_page('Plugin d\'integration de dolibarr', 'wpdoli', 'manage_options', 'wpdoli', array($this, 'menu_html'));
+		add_menu_page('Plugin d\'intégration à Dolibarr', 'WPDoli', 'manage_options', 'WPDoli', array($this, 'menu_html'));
 	}
 	
 	

@@ -18,11 +18,9 @@
 */
 
 /**
- * Wpdoli settings.
+ * WPDoli settings.
  *
-
- *
- * @package Wpdoli
+ * @package WPDoli
  */
 require_once 'abstract-wc-integration.php';
 require_once 'class-wc-logger.php';
@@ -38,7 +36,6 @@ require_once 'wpdoli-dolibarr-soap-elements.php';
 class WPDoli_WC_Integration extends WC_Integration {
 	/** @var string The Dolibarr webservice URL */
 	public $wpdoli_settings_url;
-
 
 	/** @var string The Dolibarr webservice key */
 	public $wpdoli_settings_ws_key;
@@ -57,7 +54,7 @@ class WPDoli_WC_Integration extends WC_Integration {
 
 
 	/** @var int[] The distant Dolibarr version */
-	private $dolibarr_version='3.7.0';
+	private $dolibarr_version='3.7.3';
 	/**
 	 * Dolibarr webservices endpoints
 	 */
@@ -65,10 +62,10 @@ class WPDoli_WC_Integration extends WC_Integration {
 	const THIRDPARTY_ENDPOINT = 'server_thirdparty_abonnement.php';
 	//const PRODUCT_ENDPOINT    = 'server_productorservice.php';
 	const OTHER_ENDPOINT      = 'server_other.php';
-	const ABON_ENDPOINT      = 'server_abonnement.php';
+	const ABON_ENDPOINT       = 'server_abonnement.php';
 	const PRODUCT_ENDPOINT    = 'server_abonnement.php';
 	const WSDL_MODE           = '?wsdl';
-	const WPDOLI_NS ='http://www.dolibarr.org/ns/';
+	const WPDOLI_NS           = 'http://www.dolibarr.org/ns/';
 
 	public $logger;
 
@@ -103,7 +100,7 @@ class WPDoli_WC_Integration extends WC_Integration {
 		$wsdl_mode ='';
 		$urlService = $this->wpdoli_settings_url .$service ;
 		try {
-			$soap_client = new  nusoap_client($urlService);
+			$soap_client = new nusoap_client($urlService);
 			if ($soapclient)
 			{
 				$soapclient->soap_defencoding='UTF-8';
@@ -112,7 +109,7 @@ class WPDoli_WC_Integration extends WC_Integration {
 
 		} catch ( SoapFault $exception ) {
 			$this->logger->add( 'wpdoli', $exception->getMessage() );
-			$this->errors[] = __( 'The webservice is not available. Please check the URL.'.$urlService, 'wpdoli' );
+			$this->errors[] = __( 'The WebService is not available. Please check the URL.'.$urlService, 'wpdoli' );
 			//$this->display_errors();
 			// Do nothing.
 			return -1;
