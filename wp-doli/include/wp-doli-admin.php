@@ -45,36 +45,62 @@ class WPDoliAdmin {
             register_setting('wpdoli_settings', 'wpdoli_settings_user');
             register_setting('wpdoli_settings', 'wpdoli_settings_password');
             register_setting('wpdoli_settings', 'wpdoli_settings_ws_key');
+            register_setting('wpdoli_settings', 'wpdoli_settings_site_name');
+            register_setting('wpdoli_settings', 'wpdoli_settings_key_mailchimp');
+            register_setting('wpdoli_settings', 'wpdoli_settings_listid_mailchimp');
                     
             add_settings_section('wpdoli_settings_section', 'Paramètres du plugin WPDoli', array($this, 'section_html'), 'wpdoli_settings');
+            add_settings_field('wpdoli_settings_site_name', 'Nom du site web', array($this, 'site_name'), 'wpdoli_settings', 'wpdoli_settings_section');
             add_settings_field('wpdoli_settings_url', 'Url du Web Service Dolibarr', array($this, 'url_html'), 'wpdoli_settings', 'wpdoli_settings_section');
             add_settings_field('wpdoli_settings_user', 'Web Service User', array($this, 'user_html'), 'wpdoli_settings', 'wpdoli_settings_section');
             add_settings_field('wpdoli_settings_password', 'Password', array($this, 'password_html'), 'wpdoli_settings', 'wpdoli_settings_section');
             add_settings_field('wpdoli_settings_ws_key', 'Clé du Web Service de Dolibarr', array($this, 'Webservice_key_html'), 'wpdoli_settings', 'wpdoli_settings_section');
+            add_settings_field('wpdoli_settings_ws_key', 'Clé du webservice de dolibarr', array($this, 'Webservice_key_html'), 'wpdoli_settings', 'wpdoli_settings_section');
+            add_settings_field('wpdoli_settings_key_mailchimp', 'Clé du Mailchimp', array($this, 'mailchimp_key_html'), 'wpdoli_settings', 'wpdoli_settings_section');
+            add_settings_field('wpdoli_settings_listid_mailchimp', 'ID de la liste des abonnés', array($this, 'mailchimp_listid_html'), 'wpdoli_settings', 'wpdoli_settings_section');
         }
 
         // Définition des rendus
+        public function site_name()
+        {?>
+            <select name="wpdoli_settings_site_name">
+                <option> </option>
+                <option value="alterechos.be" <?php echo get_option('wpdoli_settings_site_name')=='alterechos.be'?'selected':''?>>Alter echos </option> 
+                <option value="echosducredit.be" <?php echo get_option('wpdoli_settings_site_name')=='echosducredit.be'?'selected':''?>> Echos du credit</option>
+            </select>
+        <?php
+        }
         public function url_html()
         {?>
             <input type="text" name="wpdoli_settings_url" value="<?php echo get_option('wpdoli_settings_url')?>"/>
-            <?php
+        <?php
         }
         
         public function user_html()
         {?>
             <input type="text" name="wpdoli_settings_user" value="<?php echo get_option('wpdoli_settings_user')?>"/>
-            <?php
+        <?php
         }
         
         public function password_html()
         {?>
             <input type='password' name="wpdoli_settings_password" value="<?php echo get_option('wpdoli_settings_password')?>"/>
-            <?php
+        <?php
         }
         public function Webservice_key_html()
         {?>
             <input type="text" name="wpdoli_settings_ws_key" value="<?php echo get_option('wpdoli_settings_ws_key')?>"/>
-            <?php
+        <?php
+        }
+        public function mailchimp_key_html()
+        {?>
+            <input type="text" name="wpdoli_settings_key_mailchimp" value="<?php echo get_option('wpdoli_settings_key_mailchimp')?>"/>
+        <?php
+        }
+        public function mailchimp_listid_html()
+        {?>
+            <input type="text" name="wpdoli_settings_listid_mailchimp" value="<?php echo get_option('wpdoli_settings_listid_mailchimp')?>"/>
+        <?php
         }
         public function section_html()
         {
