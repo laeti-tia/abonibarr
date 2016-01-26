@@ -1,10 +1,10 @@
 <?php
 /*
- Plugin Name: WPDoli
+Plugin Name: WPDoli
 Plugin URI: https://github.com/tonin/abonibarr
-Description: Integration de wordpress dans dolibrr
+Description: Création de client Dolibarr par formulaire WordPress
 Version: 0.1
-Author: cassiopea
+Author: Cassiopea asbl
 Author URI: http://www.cassiopea.org/
 License: GPL-3.0+
 Text Domain: WPDoli

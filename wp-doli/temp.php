@@ -13,6 +13,7 @@ array(
 		'phone'=>$arrThirdparty['tel'],
 		'email'=>$arrThirdparty['email'],
 		'ref_ext'=> uniqid(),
+                # TODO: devrait être configurable
 		'fk_user_author'=> 1,
 		'customer_code'=> '',
 		'customer_code_accountancy'=> null,
@@ -23,11 +24,8 @@ array(
 		'note_public'=> null,
 		'province_id'=> null,
 		'country_id'=> null,
-
 		'country'=> null,
-
 		'fax'=> null,
-
 		'url'=> null,
 		'profid1'=> null,
 		'profid2'=> null,
@@ -39,5 +37,3 @@ array(
 		'vat_used'=> null,
 		'vat_number'=> null
 		);
-
-
