@@ -3,7 +3,7 @@
 Plugin Name: WPDoli
 Plugin URI: https://github.com/tonin/abonibarr
 Description: Création de client Dolibarr par formulaire WordPress
-Version: 0.1
+Version: 0.2
 Author: Cassiopea asbl
 Author URI: http://www.cassiopea.org/
 License: GPL-3.0+
@@ -11,7 +11,7 @@ Text Domain: WPDoli
 Domain Path: /languages
 */
 // Initialize constants.
-define( 'WPDOLI_VERSION', '0.1' );
+define( 'WPDOLI_VERSION', '0.2' );
 define( 'WPDOLI_DEBUG', false );
 if ( false === extension_loaded( 'soap' ) ) {
 	esc_html_e( __( 'This plugin needs SOAP PHP extension.', 'doliwoo' ) );
