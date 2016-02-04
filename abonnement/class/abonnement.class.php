@@ -400,7 +400,7 @@ class Abonnement
 			
 			//ici
 			if($commande){
-				$contrat->cloture($user);
+				//$contrat->cloture($user);
 				$this->updateExtrafieldsContrat($contrat, array('prop_renouv'=>1));
 				$outputlangs = $langs;
 				$newlang = '';

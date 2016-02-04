@@ -30,6 +30,7 @@ require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 
 
 dol_syslog("Call Dolibarr webservices interfaces");
@@ -413,7 +414,9 @@ function createThirdParty($authentication,$thirdparty,$idCmd=null)
     {
         include_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 
-        $newobject=new Societe($db);
+        $newobject=new Societe($db);$langs->setDefaultLang('fr_FR');
+       // return array('result'=>array('result_code' => $errorcode, 'result_label' => $langs->defaultlang));exit;
+        
         $newobject->ref=$thirdparty['ref'];
         $newobject->name=$thirdparty['ref'];
         $newobject->ref_ext=$thirdparty['ref_ext'];
@@ -421,6 +424,12 @@ function createThirdParty($authentication,$thirdparty,$idCmd=null)
         $newobject->client=$thirdparty['client'];
         $newobject->fournisseur=isset($thirdparty['supplier'])?$thirdparty['supplier']:'';
         $newobject->code_client=isset($thirdparty['customer_code'])?$thirdparty['customer_code']:'';
+        $tmpcode=$newobject->code_client;
+        $modCodeClient = loadModCodeTiers();
+        if (empty($tmpcode) && ! empty($modCodeClient->code_auto)) $newobject->code_client=$modCodeClient->getNextValue($newobject,0);
+        //$errorcode='KO';
+        //return array('result'=>array('result_code' => $errorcode, 'result_label' =>$newobject->code_client));
+         
         $newobject->code_fournisseur=isset($thirdparty['supplier_code'])?$thirdparty['supplier_code']:'';
         $newobject->code_compta=isset($thirdparty['customer_code_accountancy'])?$thirdparty['customer_code_accountancy']:'';
         $newobject->code_compta_fournisseur=isset($thirdparty['supplier_code_accountancy'])?$thirdparty['supplier_code_accountancy']:null;
@@ -455,6 +464,8 @@ function createThirdParty($authentication,$thirdparty,$idCmd=null)
 
         $newobject->canvas=isset($thirdparty['canvas'])?$thirdparty['canvas']:null;
         $newobject->particulier=$thirdparty['individual'];
+        $newobject->default_lang = $langs->defaultlang;
+        $fuser->lang=$langs->defaultlang;
 
         //Retreive all extrafield for thirdsparty
         // fetch optionals attributes and labels
@@ -469,6 +480,13 @@ function createThirdParty($authentication,$thirdparty,$idCmd=null)
         $db->begin();
 
         $result=$newobject->create($fuser);
+        if($result < 0 ) {
+        	$db->rollback();
+        	$error++;
+        	$errorcode='KO';
+        	return array('result'=>array('result_code' => $errorcode, 'result_label' => $newobject->errorsToString()));
+        	 
+        }
         if ($newobject->particulier && $result > 0) {
             $newobject->firstname = $thirdparty['firstname'];
             $newobject->name_bis = $thirdparty['lastname'];
@@ -805,6 +823,42 @@ function getListOfThirdParties($authentication,$filterthirdparty)
 
     return $objectresp;
 }
+function loadModCodeTiers1 () {
+	// Load object modCodeTiers
+	$module=(! empty($conf->global->SOCIETE_CODECLIENT_ADDON)?$conf->global->SOCIETE_CODECLIENT_ADDON:'mod_codeclient_leopard');
+	if (substr($module, 0, 15) == 'mod_codeclient_' && substr($module, -3) == 'php')
+	{
+		$module = substr($module, 0, dol_strlen($module)-4);
+	}
+	
+	$dirsociete=array_merge(array('/core/modules/societe/'),is_array($conf->modules_parts['societe'])?$conf->modules_parts['societe']:array());
+	foreach ($dirsociete as $dirroot)
+	{
+		$res=dol_include_once($dirroot.$module.'.php');
+		if ($res) break;
+	}
+	$modCodeClient = new $module();
+	return $modCodeClient;
+}
 
+function loadModCodeTiers () {
+	// Load object modCodeTiers
+	$module=(! empty($conf->global->SOCIETE_CODECLIENT_ADDON)?$conf->global->SOCIETE_CODECLIENT_ADDON:'mod_codeclient_leopard');
+	if (substr($module, 0, 15) == 'mod_codeclient_' && substr($module, -3) == 'php')
+	{
+		$module = substr($module, 0, dol_strlen($module)-4);
+	}
+	require_once DOL_DOCUMENT_ROOT.'/core/modules/societe/mod_codeclient_leopard.php';
+	require_once DOL_DOCUMENT_ROOT.'/core/modules/societe/mod_codeclient_elephant.php';
+
+	$dirsociete=array_merge(array('/core/modules/societe/'),is_array($conf->modules_parts['societe'])?$conf->modules_parts['societe']:array());
+	foreach ($dirsociete as $dirroot)
+	{//var_dump($dirroot.$module.'.php');
+		//$res=dol_include_once($dirroot.$module.'.php');
+		//if ($res) break;
+	}
+	$modCodeClient = new mod_codeclient_elephant();
+	return $modCodeClient;
+}
 // Return the results.
 $server->service(file_get_contents("php://input"));

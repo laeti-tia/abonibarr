@@ -383,7 +383,7 @@ class FormAbonnement extends Form
 
 	public function genereDocument($object) {
 		global $langs;
-		$outputlangs = $langs;
+		
 		$newlang = Null;
 		//$newlang = GETPOST('lang_id', 'alpha');
 		if ($conf->global->MAIN_MULTILANGS && empty($newlang))
@@ -391,6 +391,8 @@ class FormAbonnement extends Form
 		if (! empty($newlang)) {
 			$outputlangs = new Translate("", $conf);
 			$outputlangs->setDefaultLang($newlang);
+		} else {
+			$outputlangs = $langs;
 		}
 		if(is_object($object)) {
 

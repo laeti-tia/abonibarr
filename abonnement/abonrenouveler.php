@@ -180,7 +180,8 @@ $sql.= " AND (ce.prop_renouv=0 OR ce.prop_renouv is null) ";
 $sql.= " ";
 
 if( $conf->global->NBRE_JOURS_AVANT_RENOUVELLEMENT) $sql.=" AND DATEDIFF( date_fin_validite,now()) <= ". $conf->global->NBRE_JOURS_AVANT_RENOUVELLEMENT;
-$limit = 1000;
+//$limit = 10000;
+
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 //if ($mode == "0") $sql.= " AND cd.statut = 0";
 //if ($mode == "4") $sql.= " AND cd.statut = 4";
@@ -195,7 +196,7 @@ $filter_date2=dol_mktime(0,0,0,$op2month,$op2day,$op2year);
 if (! empty($filter_op1) && $filter_op1 != -1 && $filter_date1 != '') $sql.= " AND date_ouverture_prevue ".$filter_op1." '".$db->idate($filter_date1)."'";
 if (! empty($filter_op2) && $filter_op2 != -1 && $filter_date2 != '') $sql.= " AND date_fin_validite ".$filter_op2." '".$db->idate($filter_date2)."'";
 $sql .= $db->order($sortfield,$sortorder);
-$sql .= $db->plimit($limit + 1, $offset);
+//$sql .= $db->plimit($limit + 1, $offset);
 //var_dump($sql);exit;
 dol_syslog("contrat/services.php", LOG_DEBUG);
 
@@ -270,8 +271,9 @@ $resql=$db->query($sql);
 if ($resql)
 {
 	$num = $db->num_rows($resql);
+	$confListeTemp = $conf->liste_limit ;
+	$conf->liste_limit = $num;
 	$i = 0;
-
 	$param='';
 	if ($search_contract) $param.='&amp;search_contract='.urlencode($search_contract);
 	if ($search_name)      $param.='&amp;search_name='.urlencode($search_name);
@@ -354,7 +356,7 @@ if ($resql)
 	$productstatic=new Product($db);
 
 	$var=True;
-	while ($i < min($num,$limit))
+	while ($i < $num)
 	{
 		$obj = $db->fetch_object($resql);
 		$var=!$var;
@@ -409,7 +411,7 @@ if ($resql)
 		else print '&nbsp;&nbsp;&nbsp;&nbsp;';
 		print '</td>';
 		print '<td>'.dol_getdate($db->jdate($objp->date_fin_validite),true).'</td>';
-		print '<td align="right" class="nowrap"> '.$obj->cstatut;
+		print '<td align="right" class="nowrap"> ';
 		if ($obj->cstatut == 0)	// If contract is draft, we say line is also draft
 		{
 			print $contractstatic->LibStatut(0,5,($obj->date_fin_validite && $db->jdate($obj->date_fin_validite) < $now));
@@ -429,7 +431,7 @@ if ($resql)
 	$db->free($resql);
 
 	print "</table>";
-
+	$conf->liste_limit=$confListeTemp ;
 }
 else
 {
