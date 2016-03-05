@@ -177,7 +177,8 @@ $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.f
 
 $sql.= " WHERE c.entity = ".$conf->entity;
 $sql.= " AND (ce.prop_renouv=0 OR ce.prop_renouv is null) ";
-$sql.= " ";
+// On ne prend pas les abonnements fermés.
+$sql.= " AND cd.statut != 5 ";
 
 if( $conf->global->NBRE_JOURS_AVANT_RENOUVELLEMENT) $sql.=" AND DATEDIFF( date_fin_validite,now()) <= ". $conf->global->NBRE_JOURS_AVANT_RENOUVELLEMENT;
 //$limit = 10000;
@@ -202,7 +203,6 @@ dol_syslog("contrat/services.php", LOG_DEBUG);
 
 print '<form method="POST" action="'. $_SERVER["PHP_SELF"] .'">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-
 
 
 	include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
@@ -251,7 +251,10 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 
 	print $formmail->get_form();
 
-	print '<br>'."\n";
+	print '</form><br>'."\n";
+
+        print '<form method="POST" action="'. $_SERVER["PHP_SELF"] .'">';
+        print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 
 if ($resultmasssend)
 {
