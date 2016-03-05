@@ -237,16 +237,16 @@ class Abonnement
 		global $db,$conf;
 		$arrLoginParam = array();
 		//$contrat = new Contrat($db);
-
+	
 		if(is_object($contrat)) {
 			//$db->begin();
 			$contrat->fetch_thirdparty();
 			$soc = $contrat->thirdparty;
-
+	
 			$contact = $soc->contact;
 			$arrContact = $soc->contact_array();
 			$contrat->fetch_lines();
-				
+	
 			$idprod = $contrat->lines[0]->fk_product;
 			$prod = new Product($db);
 			$prod->fetch($idprod);
@@ -260,32 +260,33 @@ class Abonnement
 			//var_dump($arrContact,'user');exit;
 			//var_dump($arrContact,'login');
 			if(is_array($arrContact)&& count($arrContact)>0){
+				require_once DOL_DOCUMENT_ROOT."/core/lib/security2.lib.php";
+	
 				foreach ($arrContact as $contactid =>$label) {
 					$contact = new Contact($db);
 					$contact->fetch($contactid);
 					if(isset($attributs['options_type_produit']) && ($attributs['options_type_produit']==2 || $attributs['options_type_produit']==3))
 						$contrat->add_contact($contact->id, 'ABONWEB','external');
-						
+	
 					if(isset($attributs['options_type_produit']) && ($attributs['options_type_produit']==1 || $attributs['options_type_produit']==3))
 						$contrat->add_contact($contact->id, 'ABONPAPIER','external');
 					$nuser = new User($db);
-					$nuser->pass='passer';
-					$resultUser=$nuser->create_from_contact($contact,$contact->email,'passer');
+					$nuser->pass=getRandomPassword(false);
+					$resultUser=$nuser->create_from_contact($contact,$contact->email,$nuser->pass);
 					if( intval($conf->global->PROFIL_CLIENT)> 0 )
 						$nuser->SetInGroup(intval($conf->global->PROFIL_CLIENT), $nuser->entity);
-						
+	
 					//var_dump($nuser->newgroupid,'user');exit;
 					$arrLoginParam = array('login'=>$nuser->login,'password'=>$nuser->pass);
-
+	
 				}
-					
 					
 			}
 			return $arrLoginParam;
 			//$db->rollback();
 			//exit;
 		}
-
+	
 	}
 	function createContratFromcommande1($command) {
 		global $user,$db;

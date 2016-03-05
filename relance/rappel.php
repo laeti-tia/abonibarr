@@ -297,7 +297,7 @@ $sql.= " WHERE f.fk_soc = s.rowid";
 $sql.= " AND f.entity = ".$conf->entity;
 $sql.= " AND f.type IN (0,1,3) AND f.fk_statut = 1";
 $sql.= " AND f.paye = 0";
-if ( $late1) $sql.=" AND DATEDIFF( f.date_lim_reglement,now()) >= '".$late1."'";
+if ( intval($late1)>0) $sql.=" AND DATEDIFF( f.date_lim_reglement,now()) >= '".$late1."'";
 if ( $late2) $sql.=" AND DATEDIFF( f.date_lim_reglement,now()) <= '".$late2."'";
 
 if (! $user->rights->societe->client->voir && ! $socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -581,6 +581,7 @@ if ($resql)
 			$cn=$facturestatic->getSumCreditNotesUsed();
 			$dep=$facturestatic->getSumDepositsUsed();
 			print price($objp->am + $cn + $dep);
+			
 			print '</td>';
 
 			// Remain to receive

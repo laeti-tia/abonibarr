@@ -68,7 +68,7 @@ if ($action == 'addabonne' )
 		//var_dump(($formAbonnement->getURLContrat($id)));exit;
 		$nbreMaxAbonneWeb= intval($conf->global->NBRE_MAX_ABONNE_WEB)!=0?$conf->global->NBRE_MAX_ABONNE_WEB:10000;
 		//var_dump(($nbreMaxAbonneWeb));exit;
-		$nbreMaxAbonneWeb = 10;
+		//$nbreMaxAbonneWeb = 10;
 		if(count($tabAb) < $nbreMaxAbonneWeb) {
 			$objContact = new Contact($db);
 			$objContact->socid			= $object->socid;

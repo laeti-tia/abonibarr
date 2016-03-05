@@ -136,13 +136,7 @@ print $form->select_dolgroups($conf->global->PROFIL_CLIENT, 'PROFIL_CLIENT', 1, 
 print '</td>';
 print '</tr>';
 
-// Profil  d'abonné web
-print '<tr class="impair"><td>' . $langs->trans("PROFIL_ABONNE_WEB") . '</td>';
-print '<td align="left">';
-//print '<input type="text" name="PROFIL_ABONNE_WEB" value="' . $conf->global->PROFIL_ABONNE_WEB . '" size="4" >';
-print $form->select_dolgroups($conf->global->PROFIL_ABONNE_WEB, 'PROFIL_ABONNE_WEB', 1, array(), 0, '', '', $conf->entity);
-print '</td>';
-print '</tr>';
+
 
 print '</table>';
 

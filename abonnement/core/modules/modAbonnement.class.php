@@ -232,15 +232,15 @@ class modAbonnement extends DolibarrModules
 		$this->rights = array();		// Permission array used by this module
 		$r=0;
 		$this->rights[$r][0] = 6000011;
-		$this->rights[$r][1] = 'create  Web subscriber';
+		$this->rights[$r][1] = 'Ajouter abonné Web';//'create  Web subscriber';
 		$this->rights[$r][3] = 1;
 		$this->rights[$r][4] = 'createsubscriber';
 		$r ++;
-		$this->rights[$r][0] = 6000012;
-		$this->rights[$r][1] = 'Ajouter abonné web';
-		$this->rights[$r][3] = 1;
-		$this->rights[$r][4] = 'addsubscriberweb';
-		$r ++;
+// 		$this->rights[$r][0] = 6000012;
+// 		$this->rights[$r][1] = 'Ajouter abonné web';
+// 		$this->rights[$r][3] = 1;
+// 		$this->rights[$r][4] = 'addsubscriberweb';
+// 		$r ++;
 		$this->rights[$r][0] = 6000013;
 		$this->rights[$r][1] = 'Ajouter abonné papier';
 		$this->rights[$r][3] = 1;
@@ -362,15 +362,16 @@ class modAbonnement extends DolibarrModules
 		);
 		$r++;
 		global  $user ;
+		
 		//var_dump($user);
 		//$id = new User($db);
-		$iduser = $user->id;
+		$socid = $user->socid;
 		$this->menu[$r] = array(
 				'fk_menu' => 'fk_mainmenu=abonnement',
 				'type' => 'left',
-				'titre' => 'USER',
+				'titre' => 'PROFIL_USER',
 				'leftmenu' => 'abonnement',
-				'url' => "/user/card.php?id=$iduser",
+				'url' => "/societe/soc.php?socid=$socid",
 				'langs' => 'abonnement@abonnement',
 				'position' => 1000+$r,
 				'enabled' => '1',

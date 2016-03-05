@@ -46,7 +46,7 @@ PROFIL_ABONNE_WEB = Profil d'abonné web
 NBEXEMPLAIRES = Nombre  d'exemplaires
 SITE = Revue
 SITEID = ID revue
-
+PROFIL_USER = Mon profil
 #
 # Page À propos
 #
