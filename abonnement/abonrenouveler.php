@@ -251,10 +251,7 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 
 	print $formmail->get_form();
 
-	print '</form><br>'."\n";
-
-        print '<form method="POST" action="'. $_SERVER["PHP_SELF"] .'">';
-        print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+	print '<br>'."\n";
 
 if ($resultmasssend)
 {
