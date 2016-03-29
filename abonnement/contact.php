@@ -191,7 +191,7 @@ if ($action == 'addcontact' //&& $user->rights->contrat->creer
 
 //supprimer  un contact
 // Efface un contact
-if ($action == 'deletecontact' && $user->rights->contrat->creer)
+if ($action == 'deletecontact' && ($user->rights->contrat->creer || $user->rights->abonnement->deletesubscriberweb))
 {
 	$object->fetch($id);
 	$result = $object->delete_contact($_GET["lineid"]);

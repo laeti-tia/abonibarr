@@ -412,6 +412,12 @@ class FormAbonnement extends Form
 		$fileparams = dol_most_recent_file($conf->commande->dir_output . '/' . $ref, preg_quote($ref, '/'));
 		$file = $fileparams ['fullname'];
 		if(is_null($fuser)) $fuser = $user;
+		
+		$ref = dol_sanitizeFileName($object->ref);
+		$filename=dol_sanitizeFileName($object->ref).'.pdf';
+		$filedir=$conf->commande->dir_output . '/' . dol_sanitizeFileName($object->ref);
+		$file = $filedir . '/' . $filename;
+		$mime = 'application/pdf';
 		// Define output language
 		$outputlangs = $langs;
 		$newlang = '';
@@ -602,11 +608,17 @@ class FormAbonnement extends Form
 		include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
 		$formmail = new FormMail($db);
 		$msgishtml=0;
-		$ref = dol_sanitizeFileName($object->ref);
+		
 		include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 		$object->generateDocument($object->modelpdf);
 		$fileparams = dol_most_recent_file($conf->facture->dir_output . '/' . $ref, preg_quote($ref, '/'));
 		$file = $fileparams ['fullname'];
+		
+		$ref = dol_sanitizeFileName($object->ref);
+		$filename=dol_sanitizeFileName($object->ref).'.pdf';
+		$filedir=$conf->facture->dir_output . '/' . dol_sanitizeFileName($object->ref);
+		$file = $filedir . '/' . $filename;
+		$mime = 'application/pdf';
 		//var_dump($conf->facture->dir_output . '/' . $ref);
 		if(is_null($fuser)) $fuser = $user;
 		// Define output language

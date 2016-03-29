@@ -940,7 +940,7 @@ function getListOfProductsOrServices($authentication,$filterproduct)
 			while ($i < $num)
 			{
 				$obj=$db->fetch_object($resql);
-				$arrayproducts[]=array('id'=>$obj->rowid,'ref'=>$obj->ref,'ref_ext'=>$obj->ref_ext,'label'=>$obj->label);
+				$arrayproducts[]=array('id'=>$obj->rowid,'ref'=>$obj->ref,'ref_ext'=>$obj->ref_ext,'label'=>$obj->price.' - '.$obj->label);
 				$i++;
 			}
 		}
@@ -994,10 +994,10 @@ function getListOfProductsOrServicesForCategory($authentication,$id,$filterprodu
 	$error=0;
 	$fuser=check_authentication($authentication,$error,$errorcode,$errorlabel);
 	// Check parameters
-
+	//$prodcustprice = new Productcustomerprice($db);
 	if (! $error)
 	{
-		$sql ="SELECT p.rowid, p.ref, p.ref_ext,p.label";
+		$sql ="SELECT p.rowid, p.ref, p.ref_ext,p.label,p.price,tva_tx";
 		$sql.=" FROM ".MAIN_DB_PREFIX."product as p,";
 		$sql.="  ".MAIN_DB_PREFIX."categorie_product as cp,";
 		$sql.="  ".MAIN_DB_PREFIX."categorie as c";
@@ -1015,12 +1015,15 @@ function getListOfProductsOrServicesForCategory($authentication,$id,$filterprodu
 		if ($resql)
 		{
 			$num=$db->num_rows($resql);
-
 			$i=0;
+			global $conf;
 			while ($i < $num)
 			{
+				
 				$obj=$db->fetch_object($resql);
-				$arrayproducts[]=array('id'=>$obj->rowid,'ref'=>$obj->ref,'ref_ext'=>$obj->ref_ext,'label'=>$obj->label);
+				$pu_ht = price2num($obj->price, 'MU');
+				$pu_ttc = price2num($pu_ht * (1 + ($obj->tva_tx / 100)), 'MU').' '.$conf->currency;
+				$arrayproducts[]=array('id'=>$obj->rowid,'ref'=>$obj->ref,'ref_ext'=>$obj->ref_ext,'label'=>$pu_ttc.' - '.$obj->label);
 				$i++;
 			}
 		}
@@ -1287,6 +1290,12 @@ function getUser($authentication)
 	$fuser=check_authentication($authentication,$error,$errorcode,$errorlabel);
 
     $abon = new Abonnement($db);
+    $login = $authentication['login'];
+    $arrContrat = $abon->getAllContratByLogin($login);
+    // cloture les contrats expiré
+    foreach ($arrContrat as $id_contrat ) {
+    	$abon->closeContratexpire($id_contrat);
+    }
     $arrcontrat_active = $abon->getContratActive($authentication['login']);
 	if (! $error && count($arrcontrat_active)>0)
 	{

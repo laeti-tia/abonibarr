@@ -63,7 +63,7 @@ class modAbonnement extends DolibarrModules
 		// Name of image file used for this module.
 		// If file is in theme/yourtheme/img directory under name object_pictovalue.png, use this->picto='pictovalue'
 		// If file is in module/img directory under name object_pictovalue.png, use this->picto='pictovalue@module'
-		$this->picto='generic';
+		$this->picto='abonnement@abonnement';
 
 		// Defined all module parts (triggers, login, substitutions, menus, css, etc...)
 		// for default path (eg: /abonnement/core/xxxxx) (0=disable, 1=enable)
@@ -236,11 +236,11 @@ class modAbonnement extends DolibarrModules
 		$this->rights[$r][3] = 1;
 		$this->rights[$r][4] = 'createsubscriber';
 		$r ++;
-// 		$this->rights[$r][0] = 6000012;
-// 		$this->rights[$r][1] = 'Ajouter abonné web';
-// 		$this->rights[$r][3] = 1;
-// 		$this->rights[$r][4] = 'addsubscriberweb';
-// 		$r ++;
+		$this->rights[$r][0] = 6000012;
+		$this->rights[$r][1] = 'Supprimer abonné web';
+		$this->rights[$r][3] = 1;
+		$this->rights[$r][4] = 'deletesubscriberweb';
+		$r ++;
 		$this->rights[$r][0] = 6000013;
 		$this->rights[$r][1] = 'Ajouter abonné papier';
 		$this->rights[$r][3] = 1;

@@ -91,7 +91,7 @@ if (GETPOST("button_removefilter_x") || GETPOST("button_removefilter")) // Both 
 	$filter_op2="";
 	
 }
-//var_dump($_REQUEST);exit;
+//var_dump($_REQUEST,$action);exit;
 if ($action == 'confirmesendmail' && GETPOST('cancel'))
 {
 	$action = '';
@@ -147,6 +147,8 @@ llxHeader();
 ?>
 <script type="text/javascript">
 $(document).ready(function() {
+	document.getElementById('cancel').focus(); 
+	
 	$("#checkallsend").click(function() {
 		$(".checkforsend").attr('checked', true);
 	});
@@ -177,8 +179,7 @@ $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contrat_extrafields as ce ON c.rowid = ce.f
 
 $sql.= " WHERE c.entity = ".$conf->entity;
 $sql.= " AND (ce.prop_renouv=0 OR ce.prop_renouv is null) ";
-// On ne prend pas les abonnements fermés.
-$sql.= " AND cd.statut != 5 ";
+$sql.= " ";
 
 if( $conf->global->NBRE_JOURS_AVANT_RENOUVELLEMENT) $sql.=" AND DATEDIFF( date_fin_validite,now()) <= ". $conf->global->NBRE_JOURS_AVANT_RENOUVELLEMENT;
 //$limit = 10000;
@@ -201,8 +202,9 @@ $sql .= $db->order($sortfield,$sortorder);
 //var_dump($sql);exit;
 dol_syslog("contrat/services.php", LOG_DEBUG);
 
-print '<form method="POST" action="'. $_SERVER["PHP_SELF"] .'">';
+print '<form method="POST" action="'. $_SERVER["PHP_SELF"] .'" onSubmit=" ">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+
 
 
 	include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
@@ -275,15 +277,15 @@ if ($resql)
 	$conf->liste_limit = $num;
 	$i = 0;
 	$param='';
-	if ($search_contract) $param.='&amp;search_contract='.urlencode($search_contract);
-	if ($search_name)      $param.='&amp;search_name='.urlencode($search_name);
-	if ($search_service)  $param.='&amp;search_service='.urlencode($search_service);
-	if ($mode)            $param.='&amp;mode='.$mode;
-	if ($filter)          $param.='&amp;filter='.$filter;
-	if (! empty($filter_op1) && $filter_op1 != -1) $param.='&amp;filter_op1='.urlencode($filter_op1);
-	if (! empty($filter_op2) && $filter_op2 != -1) $param.='&amp;filter_op2='.urlencode($filter_op2);
-	if ($filter_date1 != '') $param.='&amp;op1day='.$op1day.'&amp;op1month='.$op1month.'&amp;op1year='.$op1year;
-	if ($filter_date2 != '') $param.='&amp;op2day='.$op2day.'&amp;op2month='.$op2month.'&amp;op2year='.$op2year;
+	if ($search_contract) $param.='&amp;nosend=true&amp;search_contract='.urlencode($search_contract);
+	if ($search_name)      $param.='&amp;nosend=true&amp;search_name='.urlencode($search_name);
+	if ($search_service)  $param.='&amp;nosend=true&amp;search_service='.urlencode($search_service);
+	if ($mode)            $param.='&amp;nosend=true&amp;mode='.$mode;
+	if ($filter)          $param.='&amp;nosend=true&amp;filter='.$filter;
+	if (! empty($filter_op1) && $filter_op1 != -1) $param.='&amp;nosend=true&amp;filter_op1='.urlencode($filter_op1);
+	if (! empty($filter_op2) && $filter_op2 != -1) $param.='&amp;nosend=true&amp;filter_op2='.urlencode($filter_op2);
+	if ($filter_date1 != '') $param.='&amp;op1day='.$op1day.'&amp;nosend=true&amp;op1month='.$op1month.'&amp;op1year='.$op1year;
+	if ($filter_date2 != '') $param.='&amp;op2day='.$op2day.'&amp;nosend=true&amp;op2month='.$op2month.'&amp;op2year='.$op2year;
 
 	$title=$langs->trans("REABONNEMENTLIST");
 	if ($mode == "0") $title=$langs->trans("ListOfInactiveServices");	// Must use == "0"
