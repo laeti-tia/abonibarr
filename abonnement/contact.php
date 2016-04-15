@@ -98,7 +98,7 @@ if ($action == 'addabonne' )
 			$errors=array();
 			$contactid = (GETPOST('userid') ? GETPOST('userid') : GETPOST('contactid'));
 			$contactid =  $objContact->create($user);
-           //  var_dump($contactid); exit;
+			//  var_dump($contactid); exit;
 			if ($contactid > 0)
 			{
 				$result = $object->add_contact($contactid, $_POST["type_contact"], 'external');
@@ -162,31 +162,40 @@ if ($action == 'addabonne' )
 if ($action == 'addcontact' //&& $user->rights->contrat->creer
 )
 {
-	$result = $object->fetch($id);
+	$tabAb = $formAbonnement->getArrAbonneWeb($id);
+	$nbreMaxAbonneWeb= intval($conf->global->NBRE_MAX_ABONNE_WEB)!=0?$conf->global->NBRE_MAX_ABONNE_WEB:10000;
 	
-	if ($result > 0 && $id > 0)
-	{
-		$contactid = (GETPOST('userid') ? GETPOST('userid') : GETPOST('contactid'));
-		$result = $object->add_contact($contactid, $_POST["type"], $_POST["source"]);
-		//var_dump($result );exit;
-	}
+	if(count($tabAb) < $nbreMaxAbonneWeb) {
+		$result = $object->fetch($id);
 
-	if ($result >= 0)
-	{
-		header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
-		exit;
-	}
-	else
-	{
-		if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
-			$langs->load("errors");
-			$msg = $langs->trans("ErrorThisContactIsAlreadyDefinedAsThisType");
-		} else {
-			$mesg = $object->error;
+		if ($result > 0 && $id > 0)
+		{
+			$contactid = (GETPOST('userid') ? GETPOST('userid') : GETPOST('contactid'));
+			$result = $object->add_contact($contactid, $_POST["type"], $_POST["source"]);
+			//var_dump($result );exit;
 		}
 
-		setEventMessage($mesg, 'errors');
-	}
+		if ($result >= 0)
+		{
+			header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+			exit;
+		}
+		else
+		{
+			if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS') {
+				$langs->load("errors");
+				$msg = $langs->trans("ErrorThisContactIsAlreadyDefinedAsThisType");
+			} else {
+				$mesg = $object->error;
+			}
+
+			setEventMessage($mesg, 'errors');
+		}
+	}else {
+			$mesg="Le nombre maximum d'abonné web est de $nbreMaxAbonneWeb, vous ne pouvez plus ajouter d'autre compte";
+			setEventMessage($mesg, 'errors');
+			//$action = 'create';
+		}
 }
 
 //supprimer  un contact
@@ -299,10 +308,10 @@ if ($id > 0 )
 			print '</tr>';
 
 			// Civility
-// 			print '<tr><td width="15%"><label for="civility_id">'.$langs->trans("UserTitle").'</label></td>';
-// 			print '<td>';
-// 			print $formcompany->select_civility(GETPOST("civility_id",'alpha')?GETPOST("civility_id",'alpha'):$object->civility_id);
-// 			print '</td></tr>';
+			// 			print '<tr><td width="15%"><label for="civility_id">'.$langs->trans("UserTitle").'</label></td>';
+			// 			print '<td>';
+			// 			print $formcompany->select_civility(GETPOST("civility_id",'alpha')?GETPOST("civility_id",'alpha'):$object->civility_id);
+			// 			print '</td></tr>';
 
 			print '<tr><td width="15%"><label for="type_contact">'.$langs->trans("ThirdPartyContact").'</label></td>';
 			print '<td>';
@@ -310,30 +319,30 @@ if ($id > 0 )
 			print '</td></tr>';
 
 			// Address
-// 			print '<tr><td valign="top">'.$langs->trans("Address").'</td><td>';
-// 			print '<textarea name="address" wrap="soft" cols="40" rows="2">'.(GETPOST('address','alpha')?GETPOST('address','alpha'):$object->address).'</textarea>';
-// 			print '</td></tr>';
+			// 			print '<tr><td valign="top">'.$langs->trans("Address").'</td><td>';
+			// 			print '<textarea name="address" wrap="soft" cols="40" rows="2">'.(GETPOST('address','alpha')?GETPOST('address','alpha'):$object->address).'</textarea>';
+			// 			print '</td></tr>';
 
 			// Zip / Town
 			print '<tr><td>'.$langs->trans("Zip").' / '.$langs->trans("Town").'</td><td>';
-// 			print $formcompany->select_ziptown((GETPOST('zipcode','alpha')?GETPOST('zipcode','alpha'):$object->zip),'zipcode',array('town','selectcountry_id','state_id'),6);
-// 			print ' ';
-// 			print $formcompany->select_ziptown((GETPOST('town','alpha')?GETPOST('town','alpha'):$object->town),'town',array('zipcode','selectcountry_id','state_id'));
-// 			print '</td></tr>';
+			// 			print $formcompany->select_ziptown((GETPOST('zipcode','alpha')?GETPOST('zipcode','alpha'):$object->zip),'zipcode',array('town','selectcountry_id','state_id'),6);
+			// 			print ' ';
+			// 			print $formcompany->select_ziptown((GETPOST('town','alpha')?GETPOST('town','alpha'):$object->town),'town',array('zipcode','selectcountry_id','state_id'));
+			// 			print '</td></tr>';
 
 			// Country
-// 			$object->country_id=$object->country_id?$object->country_id:$mysoc->country_id;
-// 			print '<tr><td width="25%">'.$langs->trans('Country').'</td><td>';
-// 			print $form->select_country(GETPOST('country_id','alpha')?GETPOST('country_id','alpha'):$object->country_id,'country_id');
-// 			if ($user->admin) print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"),1);
-// 			print '</td></tr>';
+			// 			$object->country_id=$object->country_id?$object->country_id:$mysoc->country_id;
+			// 			print '<tr><td width="25%">'.$langs->trans('Country').'</td><td>';
+			// 			print $form->select_country(GETPOST('country_id','alpha')?GETPOST('country_id','alpha'):$object->country_id,'country_id');
+			// 			if ($user->admin) print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"),1);
+			// 			print '</td></tr>';
 
-// 			print '<tr><td><label for="phone_pro">'.$langs->trans("PhonePro").'</label></td>';
-// 			print '<td><input name="phone_pro" id="phone_pro" type="text" size="18" maxlength="80" value="'.dol_escape_htmltag(GETPOST("phone_pro")?GETPOST("phone_pro"):$object->phone_pro).'"></td>';
-// 			print '</tr>';
-// 			print '<td><label for="phone_perso">'.$langs->trans("PhonePerso").'</label></td>';
-// 			print '<td><input name="phone_perso" id="phone_perso" type="text" size="18" maxlength="80" value="'.dol_escape_htmltag(GETPOST("phone_perso")?GETPOST("phone_perso"):$object->phone_perso).'"></td></tr>';
-// 			print '</tr>';
+			// 			print '<tr><td><label for="phone_pro">'.$langs->trans("PhonePro").'</label></td>';
+			// 			print '<td><input name="phone_pro" id="phone_pro" type="text" size="18" maxlength="80" value="'.dol_escape_htmltag(GETPOST("phone_pro")?GETPOST("phone_pro"):$object->phone_pro).'"></td>';
+			// 			print '</tr>';
+			// 			print '<td><label for="phone_perso">'.$langs->trans("PhonePerso").'</label></td>';
+			// 			print '<td><input name="phone_perso" id="phone_perso" type="text" size="18" maxlength="80" value="'.dol_escape_htmltag(GETPOST("phone_perso")?GETPOST("phone_perso"):$object->phone_perso).'"></td></tr>';
+			// 			print '</tr>';
 
 			print '<tr><td><span class="fieldrequired">'.$langs->trans("Email").' / '.$langs->trans("Id").'</span></td><td><input type="text" name="email" size="40" value="'.(isset($_POST["email"])?$_POST["email"]:$object->email).'"></td></tr>';
 
@@ -363,131 +372,144 @@ if ($id > 0 )
 		$buttoncreate.='</a>'."\n";
 
 		print "\n";
-		
-		
+
+
 		$title =  $langs->trans("ABONNECONTRACT");
 		if (  $abonnement->IsTypeProduitWebORPaPer($object, 2)) {
-		
-		print_fiche_titre($title,$buttoncreate,'');
+
+			print_fiche_titre($title,$buttoncreate,'');
 
 
-		print '<table class="noborder" width="100%">'."\n";
-		print '	<form class="tagtr pair" action="'. $_SERVER["PHP_SELF"].'?id='.$object->id.'" method="POST"> ';
-		print '<tr class="liste_titre">';
-		print_liste_field_titre($langs->trans(''));
-		print_liste_field_titre($langs->trans(''));
-		print_liste_field_titre($langs->trans('Contacts'));
-		print_liste_field_titre($langs->trans(''));
-		print_liste_field_titre($langs->trans(''));
-		print_liste_field_titre($langs->trans('Action'));
-		print '</tr>';
-		$tab = $object->liste_contact(- 1);
-		$totalCount = count($tab);
-		///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		///////////// formulaire ajout de contact 
-		?>
-		<input type="hidden" name="token" value="<?php echo $_SESSION['newtoken']; ?>" />
-		<input type="hidden" name="id" value="<?php echo $object->id; ?>" />
-		<input type="hidden" name="action" value="addcontact" />
-		<input type="hidden" name="source" value="external" />
-		<input type="hidden" name="type" value="ABONWEB" />
-		<tr>
-				<td><?php echo img_object('','contact').' '.$langs->trans("ThirdPartyContacts"); ?></td>
-				<td><?php
-						$events=array();
-						$events[]=array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php',1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled'));
-						$selectedCompany = $object->socid; 
-						echo $object->nom;
-						//$selectedCompany = $formcompany->selectCompaniesForNewContact($object, 'id', $selectedCompany, 'newcompany', '', 0, $events); 
-								
-					?>
-				</td>
-				<td><?php $nbofcontacts=$form->select_contacts($selectedCompany, '', 'contactid'); ?></td>
-				<td><?php //echo img_object('','contact').' '.$langs->trans("ThirdPartyContacts"); ?></td>
-				<td><?php //echo img_object('','contact').' '.$langs->trans("ThirdPartyContacts"); ?></td>
-				<td><input type="submit" id="add-customer-contact" class="button" value="<?php echo $langs->trans("Add"); ?>"<?php if (! $nbofcontacts) echo ' disabled="disabled"'; ?></td>
-		
-		</tr>
-		
-		<?php print '</form>';?>
-		<?php print '</table>';?>
-		<?php } ?>
-		<?php
-		print '<table class="noborder" width="100%">'."\n";
-		print '<tr class="liste_titre">';
-		print_liste_field_titre($langs->trans('Source'));
-		print_liste_field_titre($langs->trans('Company'));
-		print_liste_field_titre($langs->trans('Contacts'));
-		print_liste_field_titre($langs->trans('ContactType'));
-		print_liste_field_titre($langs->trans('Status'));
-		print_liste_field_titre($langs->trans(''));
-		print '</tr>';
+			print '<table class="noborder" width="100%">'."\n";
+			print '	<form class="tagtr pair" action="'. $_SERVER["PHP_SELF"].'?id='.$object->id.'" method="POST"> ';
+			print '<tr class="liste_titre">';
+			print_liste_field_titre($langs->trans(''));
+			print_liste_field_titre($langs->trans(''));
+			print_liste_field_titre($langs->trans('Contacts'));
+			print_liste_field_titre($langs->trans(''));
+			print_liste_field_titre($langs->trans(''));
+			print_liste_field_titre($langs->trans('Action'));
+			print '</tr>';
+			$tab = $object->liste_contact(- 1);
+			$totalCount = count($tab);
+			///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			///////////// formulaire ajout de contact
+			?>
+<input
+	type="hidden" name="token" value="<?php echo $_SESSION['newtoken']; ?>" />
+<input
+	type="hidden" name="id" value="<?php echo $object->id; ?>" />
+<input
+	type="hidden" name="action" value="addcontact" />
+<input
+	type="hidden" name="source" value="external" />
+<input type="hidden"
+	name="type" value="ABONWEB" />
+<tr>
+	<td><?php echo img_object('','contact').' '.$langs->trans("ThirdPartyContacts"); ?>
+	</td>
+	<td><?php
+	$events=array();
+	$events[]=array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php',1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled'));
+	$selectedCompany = $object->socid;
+	echo $object->nom;
+	//$selectedCompany = $formcompany->selectCompaniesForNewContact($object, 'id', $selectedCompany, 'newcompany', '', 0, $events);
 
-		$i = 0;
-		foreach ($tab as $contacttype)
-		{
-			if($contacttype['code']=='ABONWEB') {
-			print '<tr><td>';
-			if ($contacttype['source']=='internal') echo $langs->trans("User");
-			if ($contacttype['source']=='external') echo $langs->trans("ThirdPartyContact");
-			print '</td>';
+	?>
+	</td>
+	<td><?php $nbofcontacts=$form->select_contacts($selectedCompany, '', 'contactid'); ?>
+	</td>
+	<td><?php //echo img_object('','contact').' '.$langs->trans("ThirdPartyContacts"); ?>
+	</td>
+	<td><?php //echo img_object('','contact').' '.$langs->trans("ThirdPartyContacts"); ?>
+	</td>
+	<td><input type="submit" id="add-customer-contact" class="button"
+		value="<?php echo $langs->trans("Add"); ?>"
+		<?php if (! $nbofcontacts) echo ' disabled="disabled"'; ?>
+	
+	</td>
 
-			print '<td>';
-			if ($contacttype['socid'] > 0) {
-				$companystatic->fetch($contacttype['socid']);
-				echo $companystatic->getNomUrl(1);
-			}
-			if ($contacttype['socid'] < 0) {
-				echo $conf->global->MAIN_INFO_SOCIETE_NOM;
-			}
-			if (! $contacttype['socid']) {
-				echo '&nbsp;';
-			}
-			print '</td>';
+</tr>
 
-			print '<td>';
-			if ($contacttype['source'] == 'internal') {
-				$userstatic->id = $contacttype['id'];
-				$userstatic->lastname = $contacttype['lastname'];
-				$userstatic->firstname = $contacttype['firstname'];
-				echo $userstatic->getNomUrl(1);
-			}
-			if ($contacttype['source'] == 'external') {
-				$contactstatic->id = $contacttype['id'];
-				$contactstatic->lastname = $contacttype['lastname'];
-				$contactstatic->firstname = $contacttype['firstname'];
-				echo $contactstatic->getNomUrl(1);
-			}
-			print '</td>';
+<?php print '</form>';?>
+<?php print '</table>';?>
+<?php } ?>
+<?php
+print '<table class="noborder" width="100%">'."\n";
+print '<tr class="liste_titre">';
+print_liste_field_titre($langs->trans('Source'));
+print_liste_field_titre($langs->trans('Company'));
+print_liste_field_titre($langs->trans('Contacts'));
+print_liste_field_titre($langs->trans('ContactType'));
+print_liste_field_titre($langs->trans('Status'));
+print_liste_field_titre($langs->trans(''));
+print '</tr>';
 
-			print '<td>';
-			echo $contacttype['libelle'];
-			print '</td>';
+$i = 0;
+foreach ($tab as $contacttype)
+{
+	if($contacttype['code']=='ABONWEB') {
+		print '<tr><td>';
+		if ($contacttype['source']=='internal') echo $langs->trans("User");
+		if ($contacttype['source']=='external') echo $langs->trans("ThirdPartyContact");
+		print '</td>';
 
-			print '<td>';
-			if ($contacttype['source'] == 'internal') {
-				$userstatic->id = $contacttype['id'];
-				$userstatic->lastname = $contacttype['lastname'];
-				$userstatic->firstname = $contacttype['firstname'];
-				// echo $userstatic->LibStatut($contacttype['status'],3);
-			}
-			if ($contacttype['source'] == 'external') {
-				$contactstatic->id = $contacttype['id'];
-				$contactstatic->lastname = $contacttype['lastname'];
-				$contactstatic->firstname = $contacttype['firstname'];
-				echo $contactstatic->LibStatut($contacttype['status'], 3);
-			}
-			print '</td>';
-
-			print '<td>';
-			print '&nbsp;
-			<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=deletecontact&amp;lineid='.$tab[$i]['rowid'].'">'.img_delete().'</a>';
-			print '</td></tr>';
+		print '<td>';
+		if ($contacttype['socid'] > 0) {
+			$companystatic->fetch($contacttype['socid']);
+			echo $companystatic->getNomUrl(1);
 		}
+		if ($contacttype['socid'] < 0) {
+			echo $conf->global->MAIN_INFO_SOCIETE_NOM;
 		}
-		
-		print '</table>';
-       
+		if (! $contacttype['socid']) {
+			echo '&nbsp;';
+		}
+		print '</td>';
+
+		print '<td>';
+		if ($contacttype['source'] == 'internal') {
+			$userstatic->id = $contacttype['id'];
+			$userstatic->lastname = $contacttype['lastname'];
+			$userstatic->firstname = $contacttype['firstname'];
+			echo $userstatic->getNomUrl(1);
+		}
+		if ($contacttype['source'] == 'external') {
+			$contactstatic->id = $contacttype['id'];
+			$contactstatic->lastname = $contacttype['lastname'];
+			$contactstatic->firstname = $contacttype['firstname'];
+			echo $contactstatic->getNomUrl(1);
+		}
+		print '</td>';
+
+		print '<td>';
+		echo $contacttype['libelle'];
+		print '</td>';
+
+		print '<td>';
+		if ($contacttype['source'] == 'internal') {
+			$userstatic->id = $contacttype['id'];
+			$userstatic->lastname = $contacttype['lastname'];
+			$userstatic->firstname = $contacttype['firstname'];
+			// echo $userstatic->LibStatut($contacttype['status'],3);
+		}
+		if ($contacttype['source'] == 'external') {
+			$contactstatic->id = $contacttype['id'];
+			$contactstatic->lastname = $contacttype['lastname'];
+			$contactstatic->firstname = $contacttype['firstname'];
+			echo $contactstatic->LibStatut($contacttype['status'], 3);
+		}
+		print '</td>';
+
+		print '<td>';
+		print '&nbsp;
+		<a href="'.$_SERVER["PHP_SELF"].'?id='.$object->id.'&amp;action=deletecontact&amp;lineid='.$contacttype['rowid'].'">'.img_delete().'</a>';
+		print '</td></tr>';
+	}
+}
+
+print '</table>';
+ 
 
 
 	}

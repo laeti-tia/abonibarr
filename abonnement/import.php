@@ -329,10 +329,20 @@ if ($action == 'saveorder')
 	$_SESSION["dol_array_match_file_to_database"]=$serialized_array_match_file_to_database;
 	dol_syslog('dol_array_match_file_to_database='.$serialized_array_match_file_to_database);
 }
-
-
-
-
+//if($step == 5 ) {var_dump(GETPOST('accountid'),($step == 5 && (GETPOST('accountid')=='' || GETPOST('accountid')==-1	|| GETPOST('accountid')==null)));exit;}
+if($step == 5 && (GETPOST('accountid')=='' || GETPOST('accountid')==-1	|| GETPOST('accountid')==null)) {
+	
+	$mesg="Sélectionnez le Compte à créditer";
+	setEventMessage($mesg, 'errors');
+	$param='&format='.$format.'&datatoimport='.$datatoimport.'&filetoimport='.urlencode($filetoimport);
+	$separator=";";
+	if ($excludefirstline) $param.='&excludefirstline=1';
+	if ($separator) $param.='&separator='.urlencode($separator);
+	if ($enclosure) $param.='&enclosure='.urlencode($enclosure);
+	
+	Header('Location: '.$_SERVER["PHP_SELF"].'?step='.($step-1).$param);
+	exit;
+}
 /*
  * View
  */
@@ -904,7 +914,7 @@ if ($step == 4 && $datatoimport)
 	print '<tr><td width="25%">';
 	print $langs->trans('AccountToCredit');
 	print '</td>';
-	print '<td>'.$formAbonn->select_comptes($accountid,'accountid',0,'',2).'</td>';
+	print '<td >'.$formAbonn->select_comptes($accountid,'accountid',0,'',2).'</td>';
 	print '</tr>';
 	print '</table>';
 	print '<br>';
@@ -1092,12 +1102,14 @@ if ($step == 5 && $datatoimport)
 		require_once DOL_DOCUMENT_ROOT.'/abonnement/class/virementcmde.class.php';
 		$error ='';
 		$errors = array();
+		$warrings = array();
 		$nbreCommStructureSuccess =array();
 		// Loop on each input file record
 		while ($sourcelinenb < $nboflines && ! $endoffile)
 		{
 			$sourcelinenb++;
 			$errors =array();
+			$warrings = array();
 			// Read line and stor it into $arrayrecord
 			$arrayrecord=$obj->import_read_record();
 			;
@@ -1181,7 +1193,7 @@ if ($step == 5 && $datatoimport)
 				$refCmd = CommStructure::getRefcommande($refCmdComm);
 				$re = $cmd->fetch(null,trim($refCmd));
 				
-				$warrings [] = "La commande avec la référence <b> <a class='butAction' href=' ".DOL_URL_ROOT."/commande/card.php?id=$cmd->id '>"."$refCmd </a></b> déjà payée	";
+				$warrings [] = "La commande avec la référence <b> <a  href=' ".DOL_URL_ROOT."/commande/card.php?id=$cmd->id '>"."$refCmd </a></b> déjà payée	";
 				//var_dump($warrings);exit;
 			}
 			//var_dump($warring);exit;

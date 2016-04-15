@@ -80,6 +80,11 @@ function loadBox($max=20)
 
 		if ($user->rights->facture->lire)
 		{
+			$socid = $user->socid;
+			//$fuser = new User($db);
+			//$fuser->fetch($user->id);
+			//var_dump($socid);
+			//exit;
 			$sql = "SELECT f.rowid, f.facnumber, f.fk_statut, f.datef, f.type, f.total, f.total_ttc, f.paye, f.tms,";
 			$sql.= " f.date_lim_reglement as datelimite,";
 			$sql.= " s.nom as name, s.rowid as socid,";
