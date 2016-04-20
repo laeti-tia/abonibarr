@@ -1288,19 +1288,25 @@ function getUser($authentication)
 	$errorcode='';$errorlabel='';
 	$error=0;
 	$fuser=check_authentication($authentication,$error,$errorcode,$errorlabel);
+	dol_syslog("auth ok", LOG_DEBUG);
 
-    $abon = new Abonnement($db);
-    $login = $authentication['login'];
-    $arrContrat = $abon->getAllContratByLogin($login);
-    // cloture les contrats expiré
-    foreach ($arrContrat as $id_contrat ) {
-    	$abon->closeContratexpire($id_contrat);
-    }
-    $arrcontrat_active = $abon->getContratActive($authentication['login']);
+        $abon = new Abonnement($db);
+        $login = $authentication['login'];
+        $arrContrat = $abon->getAllContratByLogin($login);
+        dol_syslog("get all contrat: $arrContrat", LOG_DEBUG);
+        // cloture les contrats expiré, pq ?
+        foreach ($arrContrat as $id_contrat ) {
+            dol_syslog("on ferme les contrat expirés ?", LOG_DEBUG);
+            $abon->closeContratexpire($id_contrat);
+        }
+        dol_syslog("Fini de fermer les contrat expire", LOG_DEBUG);
+        $arrcontrat_active = $abon->getContratActive($authentication['login']);
+
 	if (! $error && count($arrcontrat_active)>0)
 	{
 		// Create
 		$user = $fuser;
+                dol_syslog(" prepare response with user data", LOG_DEBUG);
 		$objectresp = array(
 				'result'=>array('result_code'=>'OK', 'result_label'=>''),
 				'user'=>array(
@@ -1336,9 +1342,10 @@ function getUser($authentication)
 
 
 	} 
-	if(count($arrcontrat_active) <=0 ) {
+
+	if(count($arrcontrat_active) <= 0) {
 		$error ++;
-         $errorcode='ERROR_CONTRAT_USER'; $errorlabel="Votre abonnement n'est pas encore activé, veuillez contacter alter";
+                $errorcode='ERROR_CONTRAT_USER'; $errorlabel="Votre abonnement n'est pas encore activé, veuillez contacter alter";
 	}
 
 	if ($error)

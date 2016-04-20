@@ -3,11 +3,12 @@
 require_once (DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 require_once (DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
 
-require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
+require_once (DOL_DOCUMENT_ROOT."/compta/paiement/class/paiement.class.php");
 require_once (DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 require_once (DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once (DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
 require_once (DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
+require_once (DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 
 
 class Abonnement
@@ -787,7 +788,6 @@ class Abonnement
 		$sql.= " WHERE tc.element='contrat'";
 		$sql.= " AND tc.source='external'";
 		$sql.= " AND tc.code like'ABON%'";
-		var_dump($sql);
 
 		$sql  = "SELECT c.ref, cd.date_fin_validite, cd.total_ttc, cd.description as description, p.label as plabel,";
 		$sql.= " s.rowid as sid, s.nom as name, s.email, s.default_lang";
