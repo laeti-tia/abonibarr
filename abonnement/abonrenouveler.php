@@ -35,7 +35,7 @@ $langs->load("contracts");
 $langs->load("companies");
 $langs->load("abonnement");
 
-
+//var_dump($_REQUEST);
 $mode = GETPOST("mode");
 $sortfield = GETPOST("sortfield",'alpha');
 $sortorder = GETPOST("sortorder",'alpha');
@@ -71,10 +71,12 @@ $contratid = GETPOST('id','int');
 if (! empty($user->societe_id)) $socid=$user->societe_id;
 $result = restrictedArea($user, 'contrat',$contratid);
 
-
+$tabSend = array();
 $staticcontrat=new Contrat($db);
 $staticcontratligne=new ContratLigne($db);
 $companystatic=new Societe($db);
+$is_search = false;
+$is_cancel = false;
 
 if (GETPOST("button_removefilter_x") || GETPOST("button_removefilter")) // Both test are required to be compatible with all browsers
 {
@@ -89,12 +91,18 @@ if (GETPOST("button_removefilter_x") || GETPOST("button_removefilter")) // Both 
 	$op2day="";
 	$op2year="";
 	$filter_op2="";
+	$is_search = true;
 	
 }
-//var_dump($_REQUEST,$action);exit;
+if(GETPOST("button_search")) {
+	$is_search = true;
+}
+//var_dump($_REQUEST);
 if ($action == 'confirmesendmail' && GETPOST('cancel'))
 {
-	$action = '';
+	$action = 'email';
+	$tabSend =array();
+	$is_cancel = true;
 }elseif($action == 'confirmesendmail' ) {
 	if (!isset($user->email))
 	{
@@ -102,6 +110,7 @@ if ($action == 'confirmesendmail' && GETPOST('cancel'))
 		setEventMessage("NoSenderEmailDefined");
 	}
 	$countToSend = count($_POST['toSend']);
+	//var_dump($countToSend);
 	if (empty($countToSend))
 	{
 		$error++;
@@ -134,6 +143,7 @@ if ($action == 'confirmesendmail' && GETPOST('cancel'))
 	}
 
 }
+
 
 /*
  * View
@@ -199,14 +209,21 @@ if (! empty($filter_op1) && $filter_op1 != -1 && $filter_date1 != '') $sql.= " A
 if (! empty($filter_op2) && $filter_op2 != -1 && $filter_date2 != '') $sql.= " AND date_fin_validite ".$filter_op2." '".$db->idate($filter_date2)."'";
 $sql .= $db->order($sortfield,$sortorder);
 //$sql .= $db->plimit($limit + 1, $offset);
-//var_dump($sql);exit;
+//var_dump($_REQUEST);exit;
 dol_syslog("contrat/services.php", LOG_DEBUG);
-
+if($action == '') $action='email';
 print '<form method="POST" action="'. $_SERVER["PHP_SELF"] .'" onSubmit=" ">';
 print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<input type="hidden" name="action" value="'.$action.'">';
 
-
-
+$is_envoi_email = false;
+if ($action == 'email' && $is_search == false &&$is_cancel==false) {
+	$countToSend = count($_POST['toSend']);
+	$tabSend =isset($_POST['toSend'])?$_POST['toSend']:array();
+	if (($countToSend) > 0)
+	{
+		$is_envoi_email = true;
+		
 	include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
 	$formmail = new FormMail($db);
 
@@ -254,6 +271,11 @@ print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print $formmail->get_form();
 
 	print '<br>'."\n";
+	} else {
+		
+		setEventMessage("AbonContratChecked","warnings");
+		}
+	}
 
 if ($resultmasssend)
 {
@@ -292,6 +314,9 @@ if ($resql)
 	if ($mode == "4" && $filter != "expired") $title=$langs->trans("ListOfRunningServices");
 	if ($mode == "4" && $filter == "expired") $title=$langs->trans("ListOfExpiredServices");
 	if ($mode == "5") $title=$langs->trans("ListOfClosedServices");
+	
+	
+	
 	print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder,'',$num);
 
 	print '<table class="liste" width="100%">';
@@ -309,11 +334,16 @@ if ($resql)
 	print_liste_field_titre($langs->trans("ABON_NBRE_JOURS"),$_SERVER["PHP_SELF"], "s.nom",$param,"","",$sortfield,$sortorder);
 
 	print_liste_field_titre($langs->trans("Status"),$_SERVER["PHP_SELF"], "cd.statut,c.statut",$param,"","align=\"right\"",$sortfield,$sortorder);
+	
 	print '<td class="liste_titre" align="center">';
+	if(!$is_envoi_email) {
 	if ($conf->use_javascript_ajax) print '<a href="#" id="checkallsend">'.$langs->trans("All").'</a> / <a href="#" id="checknonesend">'.$langs->trans("None").'</a>';
+	}
 	print '</td>';
+	
 	print "</tr>\n";
 
+	if(!$is_envoi_email) {
 
 	print '<tr class="liste_titre">';
 	print '<td class="liste_titre">';
@@ -352,15 +382,16 @@ if ($resql)
 	print '<td class="liste_titre" align="center">';
 	print '</td>';
 	print "</tr>\n";
-	
-
+	}
 	$contractstatic=new Contrat($db);
 	$productstatic=new Product($db);
 
 	$var=True;
 	while ($i < $num)
-	{
+	{//var_dump($resql);
+	//var_dump($_POST['toSend']);
 		$obj = $db->fetch_object($resql);
+		if (count($tabSend)==0 ||(count($tabSend)>0) && in_array($obj->cid, $tabSend) ) {
 		$var=!$var;
 		print "<tr ".$bc[$var].">";
 		print '<td>';
@@ -425,14 +456,32 @@ if ($resql)
 		print '</td>';
 		//
 		print '<td class="nowrap" align="center">';
-		print '<input class="flat checkforsend" type="checkbox" name="toSend[]" value="'.$obj->cid.'">';
+	    if ($is_envoi_email) {
+		print '<input type="hidden" name="toSend[]" value="'.$obj->cid.'">';
+	    } else {
+	    	print '<input class="flat checkforsend" type="checkbox" name="toSend[]" value="'.$obj->cid.'">';
+	    }
 		print '</td>' ;
 		print "</tr>\n";
+	}
 		$i++;
 	}
 	$db->free($resql);
 
 	print "</table>";
+	print "<br/>";
+	print "<br/>";
+	
+	# Check to prepare email
+	//if($action != 'email' && $is_search == false ) {
+	//	print '';
+	//} else {
+	if (!$is_envoi_email) {
+	 print '<input type="submit" value="'.$langs->trans("Préparer l'email").'" class="button" />';
+	}
+	//print '<a class="butAction" href="'. $_SERVER["PHP_SELF"] .'?action=email&'.$param.'">'.$langs->trans("Validate").'</a>';
+	print "<br/>";
+	print "<br/>";
 	$conf->liste_limit=$confListeTemp ;
 }
 else
