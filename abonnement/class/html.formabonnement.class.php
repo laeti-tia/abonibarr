@@ -423,7 +423,7 @@ class FormAbonnement extends Form
 		$newlang = '';
 		if ($conf->global->MAIN_MULTILANGS && empty($newlang) && ! empty($_REQUEST['lang_id']))
 			$newlang = $_REQUEST['lang_id'];
-		if ($conf->global->MAIN_MULTILANGS && empty($newlang))
+		//if ($conf->global->MAIN_MULTILANGS && empty($newlang))
 			$newlang = $object->thirdparty->default_lang;
 
 		if (!empty($newlang))
@@ -432,6 +432,7 @@ class FormAbonnement extends Form
 			$outputlangs->setDefaultLang($newlang);
 			$outputlangs->load('commercial');
 		}
+		$object->generateDocument($object->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
 		///
 		//var_dump($file);exit;
 		$mime = 'application/pdf';
@@ -541,13 +542,13 @@ class FormAbonnement extends Form
 
 		if (dol_strlen($sendto))
 		{
-			$langs->load("commercial");
+			//$langs->load("commercial");
 			$from = $fuser->getFullName($langs) . ' <' . $fuser->email .'>';
 			$replyto = $from;
 				
 			$sendtobcc = $conf->global->MAIN_EMAIL_USECCC;
 			// Get message template
-			$arraydefaultmessage=$this->getEMailTemplate($db, 'abon_communication', $fuser, $langs);
+			$arraydefaultmessage=$this->getEMailTemplate($db, 'abon_communication', $fuser, $outputlangs);
 			$mesg =$arraydefaultmessage ['content'];
 			$substit ['__ORDERREF__'] = $object->ref;
 			$substit ['__ORDERID__'] = $object->id;
